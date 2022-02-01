@@ -22,13 +22,16 @@ class Board:
         # check if the board is a list
         if type(self.board) != type([]):
             return False
+            quit()
 
         # check if the first element int he board is a list
         elif type(self.board[0]) != type([]) or len(self.board) == 0:
             return False
+            quit()
 
         elif type(self.board[0][0]) != type("") or len(self.board[0]) == 0:
             return False
+            quit()
 
         totalSame = 0
         for i in range(0, self.getRow() - 1):
@@ -180,11 +183,17 @@ def generateEmptyBoard(r, c):
         inputRow = []
     return emptyBoard
    
+# static dimensions of the board
+NUM_ROWS = 6
+NUM_COLUMNS = 7
 
-
-Connect4Board = generateEmptyBoard(6, 7)
+Connect4Board = generateEmptyBoard(NUM_ROWS, NUM_COLUMNS)
 
 Board4 = Board(Connect4Board)
+if not Board4.validBoard():
+    print("Sorry, Invalid Board...")
+    quit()
+
 
 print("Let's play CONNECT4!")
 print("")
