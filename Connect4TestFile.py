@@ -247,156 +247,176 @@ ALLPOSSIBLEWINS = [
     [(0,3), (1,4), (2,5), (3,6)]
 ]
 
-ROWS = 6
-COLUMNS = 7
-Connect4Game = Connect4(ROWS, COLUMNS)
-print (Connect4Game.getBoard())
+for i5 in range(0, 100000):
+    ROWS = 6
+    COLUMNS = 7
+    Connect4Game = Connect4(ROWS, COLUMNS)
+    print (Connect4Game.getBoard())
 
-print("Let's play CONNECT4!")
-print("")
-print("Player 1 will go first and be red while Player 2 will go second and be yellow.")
-print("If you want to quit in the middle of the game, enter 'q' when asked for your move.")
-print("Enter a valid column for your move. The columns are listed as follows: ")
-print("")
+    print("Let's play CONNECT4!")
+    print("")
+    print("Player 1 will go first and be red while Player 2 will go second and be yellow.")
+    print("If you want to quit in the middle of the game, enter 'q' when asked for your move.")
+    print("Enter a valid column for your move. The columns are listed as follows: ")
+    print("")
 
-counterPlayer = 0
-quitInput = "q"
+    counterPlayer = 0
+    quitInput = "q"
 
-RedCount = 0
-YellowCount = 0
+    RedCount = 0
+    YellowCount = 0
 
-while not Connect4Game.gameFinished():
+    while not Connect4Game.gameFinished():
 
+        print("1 2 3 4 5 6 7")
+        print("-------------")
+        print(Connect4Game.toText())
+        
+        # this is for determining the which player token will be used
+        if counterPlayer % 2 == 0:
+            playerMove = "red"
+            playerToken = "R"
+
+        else:
+            playerMove = "yellow"
+            playerToken = "Y"
+
+        print("")
+        playerInput = str(random.randint(1, 8))  #<--- this was for tests to see if program had no bugs
+        # ^^ other inputs that been inputted in the Connect4.py such as strings
+
+        if playerInput.lower() == quitInput:
+            break
+
+        # check if the column entered was valid
+        if not Connect4Game.isValidMove(playerInput):
+            print("Invalid input...Please try again.")
+            print("\n")
+            continue
+
+        elif Connect4Game.isColFull(int(playerInput)):
+            print("This column is already full. Please try a different column to put your " + playerMove +  " token.")
+            print("\n")
+            continue
+        Connect4Game.updateBoard(int(playerInput), playerToken)
+        if counterPlayer % 2 == 0:
+            RedCount += 1
+        else:
+            YellowCount += 1
+
+        counterPlayer += 1
+        print("\n")
+
+        if not RedCount - YellowCount == 1 and not RedCount == YellowCount:
+            break
+
+
+
+    print(Connect4Game.toText() + "\n")
+
+    board = Connect4Game.getBoard()
+    print("--------------- END GAME ----------------\n")
+
+    print("-------------- FINAL BOARD --------------")
     print("1 2 3 4 5 6 7")
     print("-------------")
     print(Connect4Game.toText())
-    
-    # this is for determining the which player token will be used
-    if counterPlayer % 2 == 0:
-        playerMove = "red"
-        playerToken = "R"
 
+    print("\n----------------- WINNER ----------------")
+    print(Connect4Game.winner())
+
+    print("\n----------------- CHECK -----------------\n")
+
+    numTests = 0
+    totTests = 0
+
+    print("----------Test Token Count----------")
+    # make sure the the difference in Red and Yellow tokens is at most 1
+    # and that the last move was a win
+    totTests += 1
+    if RedCount - YellowCount == 1 and Connect4Game.winner() == Connect4Game.REDWIN:
+        print(True)
+        numTests += 1
+    elif RedCount == YellowCount and Connect4Game.winner() == Connect4Game.TIE:
+        print(True)
+        numTests += 1
+    elif RedCount == YellowCount and Connect4Game.winner() == Connect4Game.YELLOWWIN:
+        print(True)
+        numTests += 1
     else:
-        playerMove = "yellow"
-        playerToken = "Y"
+        print(False)
 
-    print("")
-    playerInput = str(random.randint(1, 8))  #<--- this was for tests to see if program had no bugs
-    # ^^ other inputs that been inputted in the Connect4.py such as strings
-
-    if playerInput.lower() == quitInput:
-        break
-
-    # check if the column entered was valid
-    if not Connect4Game.isValidMove(playerInput):
-        print("Invalid input...Please try again.")
-        print("\n")
-        continue
-
-    elif Connect4Game.isColFull(int(playerInput)):
-        print("This column is already full. Please try a different column to put your " + playerMove +  " token.")
-        print("\n")
-        continue
-    Connect4Game.updateBoard(int(playerInput), playerToken)
-    if counterPlayer % 2 == 0:
-        RedCount += 1
-    else:
-        YellowCount += 1
-
-    counterPlayer += 1
     print("\n")
 
-    if not RedCount - YellowCount == 1 and not RedCount == YellowCount:
-        break
+    print("-----Test Special 4 Row Matches-----")
+    # check if there is exactly only one row of 4
+    countWin = 0
+    locatedWins = []
+    for combination in ALLPOSSIBLEWINS:
+        if (board[combination[0][0]][combination[0][1]]
+        == board[combination[1][0]][combination[1][1]]
+        and board[combination[1][0]][combination[1][1]]
+        == board[combination[2][0]][combination[2][1]]
+        and board[combination[2][0]][combination[2][1]]
+        == board[combination[3][0]][combination[3][1]]
+        and not board[combination[0][0]][combination[0][1]] == Connect4Game.EMPTYBOARDFILLER):
+            countWin += 1
+            locatedWins.append(combination)
+
+    speical = False
+    # for the cases where the last move happened to complete a 4+ in a row
+    if len(locatedWins) >= 2:
+        prev = [x[0] for x in locatedWins]
+        for i in range(0, len(prev) - 1):
+            if(prev[i + 1][0] - prev[i][0] == 1 
+            or prev[i + 1][1] - prev[i][1] == 1
+            or (prev[i][0] - prev[i + 1][0] == 1 and prev[i + 1][1] - prev[i][1] == 1)
+            or (prev[i][0] - prev[i + 1][0] == 1 and prev[i][1] - prev[i + 1][1] == 1)):
+                print(True)  
+                numTests += 1
+                totTests += 1
+
+            else:
+                print("\nExamine This Case") # There be at least one common tuple in all the sets in the set
+                for token in range(6):
+                    rowInput = token
+                    if not Connect4Game.getBoard()[token][int(playerInput) - 1] == Connect4Game.EMPTYBOARDFILLER:
+                        break
+
+                tupleWin = (rowInput, int(playerInput) - 1)
+                countWinCount = 0
+                for winCombos in locatedWins:
+                    if tupleWin in winCombos:
+                        countWinCount += 1
+
+                if countWinCount == len(locatedWins):
+                    numTests += 1
+                    print(True)
+                else:
+                    print(False)
+
+                totTests += 1
+                special = True
 
 
 
-print(Connect4Game.toText() + "\n")
+    if(totTests == 1):
+        print("None")
+    print("\n")
 
-board = Connect4Game.getBoard()
-print("--------------- END GAME ----------------\n")
+    print("---------Test 4 Row Matches---------")
 
-print("-------------- FINAL BOARD --------------")
-print("1 2 3 4 5 6 7")
-print("-------------")
-print(Connect4Game.toText())
+    totTests += 1
+    if((not (len(locatedWins) >= 2) or not special) 
+    and not countWin == 1  # <---- this will erroneously say False if the last token complated two different types of 4 in a rows
+    and not Connect4Game.winner() == Connect4Game.TIE): # <---- for example, if the last token completes a diagonal and a horizontal
+        # these cases will be checked manually
+        print(False)
+    else:
+        print(True)
+        numTests += 1
 
-print("\n----------------- WINNER ----------------")
-print(Connect4Game.winner())
-
-print("\n----------------- CHECK -----------------\n")
-
-numTests = 0
-totTests = 0
-
-print("----------Test Token Count----------")
-# make sure the the difference in Red and Yellow tokens is at most 1
-# and that the last move was a win
-totTests += 1
-if RedCount - YellowCount == 1 and Connect4Game.winner() == Connect4Game.REDWIN:
-    print(True)
-    numTests += 1
-elif RedCount == YellowCount and Connect4Game.winner() == Connect4Game.TIE:
-    print(True)
-    numTests += 1
-elif RedCount == YellowCount and Connect4Game.winner() == Connect4Game.YELLOWWIN:
-    print(True)
-    numTests += 1
-else:
-    print(False)
-
-print("\n")
-
-print("-----Test Special 4 Row Matches-----")
-# check if there is exactly only one row of 4
-countWin = 0
-locatedWins = []
-for combination in ALLPOSSIBLEWINS:
-    if (board[combination[0][0]][combination[0][1]]
-    == board[combination[1][0]][combination[1][1]]
-    and board[combination[1][0]][combination[1][1]]
-    == board[combination[2][0]][combination[2][1]]
-    and board[combination[2][0]][combination[2][1]]
-    == board[combination[3][0]][combination[3][1]]
-    and not board[combination[0][0]][combination[0][1]] == Connect4Game.EMPTYBOARDFILLER):
-        countWin += 1
-        locatedWins.append(combination)
-
-# for the cases where the last move happened to complete a 4+ in a row
-if len(locatedWins) >= 2 and len(locatedWins) <= 4:
-    prev = [x[0] for x in locatedWins]
-    for i in range(0, len(prev) - 1):
-        if(prev[i + 1][0] - prev[i][0] == 1 
-        or prev[i + 1][1] - prev[i][1] == 1
-        or (prev[i][0] - prev[i + 1][0] == 1 and prev[i + 1][1] - prev[i][1] == 1)
-        or (prev[i][0] - prev[i + 1][0] == 1 and prev[i][1] - prev[i + 1][1] == 1)):
-            print(True)  
-            numTests += 1
-            totTests += 1
-
-        else:
-            print("Examine This Case")
-            print(False) # There be at least one common tuple in all the sets in the set
-            totTests += 1
-
-
-if(totTests == 1):
-    print("None")
-print("\n")
-
-print("---------Test 4 Row Matches---------")
-
-totTests += 1
-if(not (len(locatedWins) >= 2 and len(locatedWins) <= 4) 
-and not countWin == 1  # <---- this will erroneously say False if the last token complated two different types of 4 in a rows
-and not Connect4Game.winner() == Connect4Game.TIE): # <---- for example, if the last token completes a diagonal and a horizontal
-    # these cases will be checked manually
-    print(False)
-else:
-    print(True)
-    numTests += 1
-
-print("\nThis game passed %d out of %d tests." %(numTests, totTests))
+    print("\nThis game passed %d out of %d tests." %(numTests, totTests))
 
 '''
     Bug in the check is that this will throw a test as false if the last token/move 
