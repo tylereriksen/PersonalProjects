@@ -174,7 +174,6 @@ class Connect4:
 ROWS = 6
 COLUMNS = 7
 Connect4Game = Connect4(ROWS, COLUMNS)
-print (Connect4Game.getBoard())
 
 print("Let's play CONNECT4!")
 print("")
@@ -184,7 +183,7 @@ print("Enter a valid column for your move. The columns are listed as follows: ")
 print("")
 
 counterPlayer = 0
-quitInput = ""
+quitInput = "q"
 
 while not Connect4Game.gameFinished():
 
@@ -195,11 +194,11 @@ while not Connect4Game.gameFinished():
     # this is for determining the which player token will be used
     if counterPlayer % 2 == 0:
         playerMove = "red"
-        playerToken = "R"
+        playerToken = Connect4Game.PLAYERMOVE1
 
     else:
         playerMove = "yellow"
-        playerToken = "Y"
+        playerToken = Connect4Game.PLAYERMOVE2
 
     print("")
     playerInput = input("Enter a column to put your " + playerMove + " token: ")
