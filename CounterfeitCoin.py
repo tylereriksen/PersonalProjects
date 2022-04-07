@@ -34,8 +34,8 @@ def totalWeights(listCoins):
     return totalWeight
 
 # constant variables for number of coins, expected number of balance usage, authentic coin weights, and counterfeit weight
-NUMCOINS = random.randint(1000,100000)
-EXPECTED_TRIALS = int(math.log(NUMCOINS, 3)) + 1
+NUMCOINS = random.randint(3**3,3**10)
+EXPECTED_TRIALS = int(math.log(NUMCOINS - 0.5, 3)) + 1
 REALWEIGHT = 1
 FAKEWEIGHT = 0.5
 listOfCoins = [Coin(x, REALWEIGHT) for x in range(1, NUMCOINS + 1)]
