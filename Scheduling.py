@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import random
 
 BUFFER = 0.5
 TIMEDURATION = 1
@@ -89,8 +90,26 @@ def getCustomerAvailableTimes(companyDict):
 
     return listCustomerTimes
 
+def updateCustomerRequest(userInput, companyDict, duration = TIMEDURATION, buffer = BUFFER):
+    # check if time is a valid imput
+    containsTime = False
+    for timeDict in getCustomerAvailableTimes(companyDict):
+        if containsTime or userInput in timeDict:
+            containsTime = True
+            break
+
+    if not containsTime:
+        print("Invalid Input")
+        return "Error"
+
+    availableEmployees = []
+    for employee in companyDict:
+        if userInput in companyDict[employee]:
+            availableEmployees.append(employee)
+
+    employeeWorking = random.choice(availableEmployees)
     
 
 print(employeesAvailableTimes(employeeWorkTimesDict))
 print(numEmployeesPerTimes(employeeWorkTimesDict))
-print(getCustomerAvailableTimes(employeeWorkTimesDict))
+print("Customer available times: " + str(getCustomerAvailableTimes(employeeWorkTimesDict)))
