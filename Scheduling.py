@@ -58,16 +58,29 @@ employeeWorkTimesDict = {}
 for idx, num in enumerate(df['Employee Name']):
     employeeWorkTimesDict[num] = [df['Shift Start Time'][idx], df['Shift End Time'][idx]]
 
-def convertDictToList(companyDict, timeDuration = TIMEDURATION):
+def employeesAvailableTimes(companyDict, timeDuration = TIMEDURATION):
     returnFixedDict = {}
     for idx, name in enumerate(companyDict.keys()):
         workingDef = companyDict[name]
         startTime = roundUpNearestInterval(timeToNumber(workingDef[0]))
         endTime = roundDownNearestInterval(timeToNumber(workingDef[1]))
-        listOfTimes = list(np.arange(startTime, endTime - TIMEDURATION + INTERVAL, INTERVAL))
+        listOfTimes = list(numberToTime(x) for x in np.arange(startTime, endTime - TIMEDURATION + INTERVAL, INTERVAL))
         returnFixedDict[name] = listOfTimes
 
     return returnFixedDict
 
+def numEmployeesPerTimes(companyDict):
+    returnFixedDict = {}
+    for x in np.arange(0, 24, INTERVAL):
+        returnFixedDict[numberToTime(x)] = 0
 
-print(convertDictToList(employeeWorkTimesDict))
+    for employee in companyDict:
+        for time in companyDict[employee]:
+            returnFixedDict[time] += 1
+
+    return returnFixedDict
+
+    
+
+print(employeesAvailableTimes(employeeWorkTimesDict))
+print(numEmployeesPerTimes(employeeWorkTimesDict))
