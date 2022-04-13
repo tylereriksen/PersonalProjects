@@ -103,13 +103,23 @@ def updateCustomerRequest(userInput, companyDict, duration = TIMEDURATION, buffe
         return "Error"
 
     availableEmployees = []
-    for employee in companyDict:
-        if userInput in companyDict[employee]:
+    for employee in employeesAvailableTimes(companyDict):
+        if userInput in employeesAvailableTimes(companyDict)[employee]:
             availableEmployees.append(employee)
 
     employeeWorking = random.choice(availableEmployees)
-    
+
+    workingList = companyDict[employeeWorking]
+    for i in np.arange(-buffer - 0.5, duration + buffer, 0.5):
+        if numberToTime(timeToNumber(userInput) + i) in workingList:
+            workingList.remove(numberToTime(timeToNumber(userInput) + i))
+    companyDict[employeeWorking] = workingList
+
+    return companyDict, employeeWorking
 
 print(employeesAvailableTimes(employeeWorkTimesDict))
 print(numEmployeesPerTimes(employeeWorkTimesDict))
 print("Customer available times: " + str(getCustomerAvailableTimes(employeeWorkTimesDict)))
+employeeWorkTimesDict, employee = updateCustomerRequest("12:30", employeeWorkTimesDict)
+print("Customer avialable times now: " + str(getCustomerAvailableTimes(employeeWorkTimesDict)))
+print(employee)
