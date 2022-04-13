@@ -75,12 +75,22 @@ def numEmployeesPerTimes(companyDict):
         returnFixedDict[numberToTime(x)] = 0
 
     for employee in companyDict:
-        for time in companyDict[employee]:
+        for time in employeesAvailableTimes(companyDict)[employee]:
             returnFixedDict[time] += 1
 
     return returnFixedDict
+
+def getCustomerAvailableTimes(companyDict):
+    listCustomerTimes = []
+
+    for time in numEmployeesPerTimes(companyDict):
+        if numEmployeesPerTimes(companyDict)[time] != 0:
+            listCustomerTimes.append(time)
+
+    return listCustomerTimes
 
     
 
 print(employeesAvailableTimes(employeeWorkTimesDict))
 print(numEmployeesPerTimes(employeeWorkTimesDict))
+print(getCustomerAvailableTimes(employeeWorkTimesDict))
