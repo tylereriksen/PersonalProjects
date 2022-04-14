@@ -1,3 +1,10 @@
+'''
+    This file looks to display both from the user-perspective as well as
+    the backend for the company times of employees and the times available
+    for customers. The functions here helps organize the data into specific
+    types of data types and return types in accordance to its practicality.
+'''
+
 import pandas as pd
 import numpy as np
 import random
