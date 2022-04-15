@@ -55,6 +55,8 @@ def numberToTime(numTime):
     return str(hours) + ":" + min
 
 
+# dictionary of employees of the company and the times they are working
+# key is the employee names and the definition is the start and end times of their shift
 employeeWorkTimes = {
     'Employee Name': ['John Joe', 'Henry McGuire', 'Tony Toni'],
     'Shift Start Time': ['7:00', '10:30', '13:30'],
@@ -62,6 +64,9 @@ employeeWorkTimes = {
 }
 df = pd.DataFrame(data=employeeWorkTimes)
 
+
+# convert into a dictionary for easier use
+# might be unncessary but scripted the functions to work with this type
 employeeWorkTimesDict = {}
 for idx, num in enumerate(df['Employee Name']):
     employeeWorkTimesDict[num] = [df['Shift Start Time'][idx], df['Shift End Time'][idx]]
