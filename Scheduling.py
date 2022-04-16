@@ -119,7 +119,7 @@ def updateCustomerRequest(userInput, companyDict, duration = TIMEDURATION, buffe
     employeeWorking = random.choice(availableEmployees)
 
     workingList = companyDict[employeeWorking]
-    for i in np.arange(-buffer - 0.5, duration + buffer, 0.5):
+    for i in np.arange(-buffer - INTERVAL, duration + buffer, INTERVAL):
         if numberToTime(timeToNumber(userInput) + i) in workingList:
             workingList.remove(numberToTime(timeToNumber(userInput) + i))
     companyDict[employeeWorking] = workingList
@@ -127,9 +127,15 @@ def updateCustomerRequest(userInput, companyDict, duration = TIMEDURATION, buffe
     return companyDict, employeeWorking
 
 workingListEmployeeTimes = employeesAvailableTimes(employeeWorkTimesDict)
-print(employeesAvailableTimes(employeeWorkTimesDict)) # name followed by list of times available
+
+print(workingListEmployeeTimes) # name followed by list of times available
 print(numEmployeesPerTimes(workingListEmployeeTimes)) # number of employees available per time slot
 print("Customer available times: " + str(getCustomerAvailableTimes(workingListEmployeeTimes))) # list of times customers can book
+
+# update with a customer request for a certain time
 workingListEmployeeTimes, employee = updateCustomerRequest("18:15", workingListEmployeeTimes)
+print("\nAppointment made successfully! %s will come at your scheduled time." %(employee))
+
+print(workingListEmployeeTimes)
+print(numEmployeesPerTimes(workingListEmployeeTimes))
 print("Customer avialable times now: " + str(getCustomerAvailableTimes(workingListEmployeeTimes)))
-print(employee)
