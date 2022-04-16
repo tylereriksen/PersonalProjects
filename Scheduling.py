@@ -14,11 +14,13 @@ TIMEDURATION = 1
 INTERVAL = 0.25
 ERROR_MESSAGE = "ERROR"
 
+# round up to the nearest interval multiple
 def roundUpNearestInterval(num):
     listHalf = list(np.arange(0,24, INTERVAL))
     intReturn = [x for x in listHalf if 0 <= x - num < INTERVAL]
     return intReturn[0]
 
+# round down to the nearest interval multiple
 def roundDownNearestInterval(num):
     listHalf = list(np.arange(0,24, INTERVAL))
     intReturn = [x for x in listHalf if 0 <= num - x < INTERVAL]
@@ -55,8 +57,6 @@ def numberToTime(numTime):
     return str(hours) + ":" + min
 
 
-# dictionary of employees of the company and the times they are working
-# key is the employee names and the definition is the start and end times of their shift
 employeeWorkTimes = {
     'Employee Name': ['John Joe', 'Henry McGuire', 'Tony Toni'],
     'Shift Start Time': ['7:00', '10:30', '13:30'],
@@ -64,9 +64,6 @@ employeeWorkTimes = {
 }
 df = pd.DataFrame(data=employeeWorkTimes)
 
-
-# convert into a dictionary for easier use
-# might be unncessary but scripted the functions to work with this type
 employeeWorkTimesDict = {}
 for idx, num in enumerate(df['Employee Name']):
     employeeWorkTimesDict[num] = [df['Shift Start Time'][idx], df['Shift End Time'][idx]]
@@ -88,7 +85,7 @@ def numEmployeesPerTimes(companyDict):
         returnFixedDict[numberToTime(x)] = 0
 
     for employee in companyDict:
-        for time in employeesAvailableTimes(companyDict)[employee]:
+        for time in companyDict[employee]:
             returnFixedDict[time] += 1
 
     return returnFixedDict
@@ -115,8 +112,8 @@ def updateCustomerRequest(userInput, companyDict, duration = TIMEDURATION, buffe
         return "Error"
 
     availableEmployees = []
-    for employee in employeesAvailableTimes(companyDict):
-        if userInput in employeesAvailableTimes(companyDict)[employee]:
+    for employee in companyDict:
+        if userInput in companyDict[employee]:
             availableEmployees.append(employee)
 
     employeeWorking = random.choice(availableEmployees)
@@ -129,9 +126,10 @@ def updateCustomerRequest(userInput, companyDict, duration = TIMEDURATION, buffe
 
     return companyDict, employeeWorking
 
-print(employeesAvailableTimes(employeeWorkTimesDict))
-print(numEmployeesPerTimes(employeeWorkTimesDict))
-print("Customer available times: " + str(getCustomerAvailableTimes(employeeWorkTimesDict)))
-employeeWorkTimesDict, employee = updateCustomerRequest("12:30", employeeWorkTimesDict)
-print("Customer avialable times now: " + str(getCustomerAvailableTimes(employeeWorkTimesDict)))
+workingListEmployeeTimes = employeesAvailableTimes(employeeWorkTimesDict)
+print(employeesAvailableTimes(employeeWorkTimesDict)) # name followed by list of times available
+print(numEmployeesPerTimes(workingListEmployeeTimes)) # number of employees available per time slot
+print("Customer available times: " + str(getCustomerAvailableTimes(workingListEmployeeTimes))) # list of times customers can book
+workingListEmployeeTimes, employee = updateCustomerRequest("18:15", workingListEmployeeTimes)
+print("Customer avialable times now: " + str(getCustomerAvailableTimes(workingListEmployeeTimes)))
 print(employee)
