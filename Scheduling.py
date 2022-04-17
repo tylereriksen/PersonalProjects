@@ -119,7 +119,7 @@ def updateCustomerRequest(userInput, companyDict, duration = TIMEDURATION, buffe
     employeeWorking = random.choice(availableEmployees)
 
     workingList = companyDict[employeeWorking]
-    for i in np.arange(-buffer - INTERVAL, duration + buffer, INTERVAL):
+    for i in np.arange(-buffer - duration + INTERVAL, duration + buffer, INTERVAL):
         if numberToTime(timeToNumber(userInput) + i) in workingList:
             workingList.remove(numberToTime(timeToNumber(userInput) + i))
     companyDict[employeeWorking] = workingList
@@ -159,4 +159,3 @@ print("Appointment made successfully! %s will come at your scheduled time.\n" %(
 print(workingListEmployeeTimes)
 print(numEmployeesPerTimes(workingListEmployeeTimes))
 print("Customer avialable times now: " + str(getCustomerAvailableTimes(workingListEmployeeTimes)))
-
