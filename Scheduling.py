@@ -133,9 +133,20 @@ print(numEmployeesPerTimes(workingListEmployeeTimes)) # number of employees avai
 print("Customer available times: " + str(getCustomerAvailableTimes(workingListEmployeeTimes))) # list of times customers can book
 
 # update with a customer request for a certain time
+# ----------18:15----------
+print("\n---------------18:15---------------")
 workingListEmployeeTimes, employee = updateCustomerRequest("18:15", workingListEmployeeTimes)
-print("\nAppointment made successfully! %s will come at your scheduled time." %(employee))
-
+print("Appointment made successfully! %s will come at your scheduled time.\n" %(employee))
 print(workingListEmployeeTimes)
 print(numEmployeesPerTimes(workingListEmployeeTimes))
 print("Customer avialable times now: " + str(getCustomerAvailableTimes(workingListEmployeeTimes)))
+
+# update with a customer request for a different certain time
+# ----------12:30----------
+print("\n---------------12:30---------------")
+workingListEmployeeTimes, employee = updateCustomerRequest("12:30", workingListEmployeeTimes)
+print("Appointment made successfully! %s will come at your scheduled time.\n" %(employee))
+print(workingListEmployeeTimes)
+print(numEmployeesPerTimes(workingListEmployeeTimes))
+print("Customer avialable times now: " + str(getCustomerAvailableTimes(workingListEmployeeTimes)))
+
