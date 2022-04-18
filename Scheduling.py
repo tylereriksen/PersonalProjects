@@ -159,3 +159,12 @@ print("Appointment made successfully! %s will come at your scheduled time.\n" %(
 print(workingListEmployeeTimes)
 print(numEmployeesPerTimes(workingListEmployeeTimes))
 print("Customer avialable times now: " + str(getCustomerAvailableTimes(workingListEmployeeTimes)))
+
+# update with a customer request for a different certain time
+# ----------16:30----------
+print("\n---------------16:30---------------")
+workingListEmployeeTimes, employee = updateCustomerRequest("16:30", workingListEmployeeTimes)
+print("Appointment made successfully! %s will come at your scheduled time.\n" %(employee))
+print(workingListEmployeeTimes)
+print(numEmployeesPerTimes(workingListEmployeeTimes))
+print("Customer avialable times now: " + str(getCustomerAvailableTimes(workingListEmployeeTimes)))
