@@ -158,5 +158,23 @@ public class CounterfeitCoin {
 
             WeighNumber += 1;
         }
+
+        System.out.println("\n--------------------Final Verdict--------------------");
+        System.out.println("Through our " + (WeighNumber - 1) + " weight trials, we have found that coin " + listWeighingCoins.get(0).getIdentifier() + " is the counterfeit.\n");
+
+        System.out.println("----------------------Analysis-----------------------");
+        if (listWeighingCoins.get(0).getIdentifier() == COUNTERFEIT_ID && listWeighingCoins.size() == 1) {
+            System.out.println("SUCCESS! This was the correct coin.");
+        }
+        else {
+            System.out.println("ERROR! This is the wrong coin. Please check program.");
+        }
+
+        if (WeighNumber - 1 <= EXPECTED_TRIALS) {
+            System.out.println("SUCCESS! We were able to find the counterfeit coin within the " + EXPECTED_TRIALS + " expected moves for this algorithm.\n");
+        }
+        else {
+            System.out.println("ERROR! Algorithm was not able to find the counterfeit in less than " + EXPECTED_TRIALS + " weighings.\n");
+        }
     }
 }

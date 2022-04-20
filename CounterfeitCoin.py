@@ -112,7 +112,7 @@ def findCounterfeit(coinNum):
 
     # see the results of it
     print("\n--------------------Final Verdict--------------------")
-    print("Through our %d weight trials, we have found that %d coin is the counterfeit.\n" %(WeighNumber - 1, listWeighingCoins[0].getIdentifier()))
+    print("Through our %d weight trials, we have found that coin %d is the counterfeit.\n" %(WeighNumber - 1, listWeighingCoins[0].getIdentifier()))
 
     print("----------------------Analysis-----------------------")
     if listWeighingCoins[0].getIdentifier() == randomCoinFake and len(listWeighingCoins) == 1:
@@ -123,7 +123,7 @@ def findCounterfeit(coinNum):
     if WeighNumber - 1 <= EXPECTED_TRIALS:
         print("SUCCESS! We were able to find the counterfeit coin within the %d expected moves for this algorithm.\n" %(EXPECTED_TRIALS))
     else:
-        print("ERROR! Algorithm was not able to find the counterfeit in less weighings.\n")
+        print("ERROR! Algorithm was not able to find the counterfeit in less that %d weighings.\n" %(EXPECTED_TRIALS))
 
 
 
