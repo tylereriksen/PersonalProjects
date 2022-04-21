@@ -2,19 +2,36 @@ import java.util.Random;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class that simulates a coin by indetifier differtiation
+ * and weights
+ */
 class Coin {
     int identifier;
     double weight;
 
+    /**
+     * Initializer
+     * @param identifier int value for simplicity to identify different coins
+     * @param weight double for the weight of the coin
+     */
     Coin(int identifier, double weight) {
         this.identifier = identifier;
         this.weight = weight;
     }
 
+    /**
+     * get the identifier value
+     * @return identifier int value
+     */
     int getIdentifier() {
         return this.identifier;
     }
 
+    /**
+     * get the weight fo the coin
+     * @return weight double value
+     */
     double getWeight() {
         return this.weight;
     }
@@ -22,6 +39,11 @@ class Coin {
 
 public class CounterfeitCoin {
 
+    /**
+     * method to get the sum of the weights of coins in an ArrayList
+     * @param listCoin ArrayList of coin objects
+     * @return double value sum of weights
+     */
     public static double getTotalWeight(ArrayList<Coin> listCoin) {
         double totalWeight = 0;
         for(Coin coin: listCoin) {
