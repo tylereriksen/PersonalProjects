@@ -1,3 +1,9 @@
+'''
+    File that aims to make its own KNN machine learning algorithm and then
+    comparing it to the sklearn package for KNN Learning.
+'''
+
+
 import pandas as pd
 import math
 import numpy as np
@@ -29,8 +35,16 @@ def findKeyMax(dict):
                 returnList.append(idx)
     return returnList
 
+
+cov = []
+m = []
+s = []
+a = []
+
+
+
 # read the data
-data = pd.read_csv("./KNN/car.data")
+data = pd.read_csv("./student/car.data")
 
 # convert to numerical data
 le = preprocessing.LabelEncoder()
@@ -59,16 +73,19 @@ K = 9
 for idx in range(len(x_test)):
     pointTest1 = x_test[idx]
     pointTester1 = y_test[idx]
+    cov.append(pointTest1)
+    a.append(pointTester1)
 
     print()
     dict_neighbors = {}
     res = sorted(range(len(x_train)), key = lambda sub: distanceNeighbor(x_train[sub], pointTest1))
     for thing in res[:K]:
-        print(thing, "Distance:", distanceNeighbor(x_train[thing], pointTest1), "Score:", y_train[thing])
+        print(thing, "Distance:", distanceNeighbor(x_train[thing], pointTest1), "Class:", y_train[thing])
         dict_neighbors[y_train[thing]] = 0
+    print()
     for thing in res[:K]:
         dict_neighbors[y_train[thing]] += 1
-        print(pointTest1, "-->", x_train[thing], "=", distanceNeighbor(x_train[thing], pointTest1))
+        # print(pointTest1, "-->", x_train[thing], "=", distanceNeighbor(x_train[thing], pointTest1))
 
 
 
@@ -88,6 +105,7 @@ for idx in range(len(x_test)):
 
     print()
     print("Predicted Value:", list(dict_neighbors.keys())[dict[0]])
+    m.append(list(dict_neighbors.keys())[dict[0]])
     print("Actual Value of Test Point:", pointTester1)
     totalTests += 1
     if list(dict_neighbors.keys())[dict[0]] == y_train[thing]:
@@ -100,3 +118,12 @@ model = KNeighborsClassifier(n_neighbors=K)
 model.fit(x_train, y_train)
 acc = model.score(x_test, y_test)
 print(acc)
+
+predicted = model.predict(x_test)
+for x in range(len(predicted)):
+    s.append(predicted[x])
+
+d = {"covariates values": cov, "my result": m, "scikit result": s, "actual result": a}
+df = pd.DataFrame(data = d)
+print(df)
+df.to_csv("carDataComparison.csv") # write to csv file
