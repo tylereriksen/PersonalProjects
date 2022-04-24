@@ -68,7 +68,7 @@ x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y
 # define important variables for the self-made implementation of KNN
 correctTests = 0
 totalTests = 0
-K = 9
+K = 7
 
 for idx in range(len(x_test)):
     pointTest1 = x_test[idx]
@@ -127,3 +127,10 @@ d = {"covariates values": cov, "my result": m, "scikit result": s, "actual resul
 df = pd.DataFrame(data = d)
 print(df)
 df.to_csv("carDataComparison.csv") # write to csv file
+
+'''
+    There seems to a slightly different trend between these two algorithms. The built in KNN
+    learning model seems to have a peak accuracy around 7 neighbors and decreases in accuracy
+    if its too small or too large compared to that while the custom coded KNN algorithm seems
+    to do the best as it gets smaller, typically peaking around 3 neighbors.
+'''
