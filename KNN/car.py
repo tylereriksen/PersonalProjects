@@ -1,4 +1,4 @@
-# REFERENCES: Tech With Tim Video on KNN Learning, Geeks for Geeks Lamda Functions
+# REFERENCES: Tech With Tim Video on KNN Learning, Chingis Oinar's Toward Data Science article
 '''
     File that aims to make its own KNN machine learning algorithm and then
     comparing it to the sklearn package for KNN Learning.
