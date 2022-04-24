@@ -3,7 +3,7 @@
     comparing it to the sklearn package for KNN Learning.
 '''
 
-
+# import packages
 import pandas as pd
 import math
 import numpy as np
@@ -14,6 +14,11 @@ from sklearn.utils import shuffle
 
 # method for finding the distance between data points
 def distanceNeighbor(trainSet, compareSet, weights = []):
+    '''
+        Find the distance between the trainSet and compareSet as a 
+        linear combination of the square root of the sum of squares
+        of the differences in values between the two sets
+    '''
     if weights == []:
         weights = [1 for x in range(len(trainSet))]
 
@@ -22,8 +27,16 @@ def distanceNeighbor(trainSet, compareSet, weights = []):
         sum += ((num - compareSet[idx]) ** 2) * weights[idx]
     return math.sqrt(sum)
 
+
 # method for finding the indexes of the keys with the highest values (list form)
 def findKeyMax(dict):
+    '''
+        Finds the index of the key with the highest value within the passed in
+        dictionary. It will return as a list since there me be a case where there
+        is a tie for the keys with the highest values in a dictionary, which will
+        be of note in this KNN learning algorithm since we need to have a 
+        definitive maximum in order to predict the result
+    '''
     returnList = [0]
     for idx, num in enumerate(dict.keys()):
         if idx == 0:
@@ -35,12 +48,41 @@ def findKeyMax(dict):
                 returnList.append(idx)
     return returnList
 
+def myKNNLearn(K, trainInput, trainOutput, testInput):
+    '''
+        This is a function for the predicting the output of particular inputs
+        based on the model trained with K neighbors on the sets of trainInput
+        and trainOutput. This function can be used to see what the learning
+        algorithm outputs when being implemented a particular set of covariates
+        and comparing with the actual value or to see its prediction
+    '''
+    dict_neighbors = {}
+    res = sorted(range(len(trainInput)), key = lambda sub: distanceNeighbor(trainInput[sub], testInput))
+    for data in res[:K]:
+        dict_neighbors[trainOutput[data]] = 0
+    for data in res[:K]:
+        dict_neighbors[trainOutput[data]] += 1
 
+    dict = findKeyMax(dict_neighbors)
+    counter = 0
+    while not len(dict) == 1:
+        newP = res[K + counter]
+        if trainOutput[newP] not in dict_neighbors.keys():
+            dict_neighbors[trainOutput[newP]] = 1
+        else:
+            dict_neighbors[trainOutput[newP]] += 1
+        dict = findKeyMax(dict_neighbors)
+        counter += 1
+
+    return list(dict_neighbors.keys())[dict[0]]
+
+
+# some lists to see the output results and difference between my custom implementation
+# of the KNN machine learning algorithm and the sklearn one
 cov = []
 m = []
 s = []
 a = []
-
 
 
 # read the data
@@ -113,7 +155,7 @@ for idx in range(len(x_test)):
 
 print("%d out of %d tests matched with the machine learning prediction, giving an accuracy of %f percent." %(correctTests, totalTests, (100 * correctTests) / totalTests))
 
-# this is the SciKitLearn model for KNN to compare to our model
+# this is the SKLearn model for KNN to compare to our model
 model = KNeighborsClassifier(n_neighbors=K)
 model.fit(x_train, y_train)
 acc = model.score(x_test, y_test)
