@@ -12,6 +12,9 @@ from sklearn import linear_model, preprocessing
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.utils import shuffle
 
+def getCertainIndex(listX, idx):
+    return [listX[x] for x in idx]
+
 # method for finding the distance between data points
 def distanceNeighbor(trainSet, compareSet, weights = []):
     if weights == []:
@@ -71,6 +74,15 @@ predict = "class"
 X = list(zip(buying, maint, door, persons, lug_boot, safety))
 y = list(cls)
 
+list0 = [idx for idx in range(len(cls)) if cls[idx] == 0]
+list1 = [idx for idx in range(len(cls)) if cls[idx] == 1]
+list2 = [idx for idx in range(len(cls)) if cls[idx] == 2]
+list3 = [idx for idx in range(len(cls)) if cls[idx] == 3]
+x0_train, x0_test, y0_train, y0_test = sklearn.model_selection.train_test_split(list(zip(getCertainIndex(buying, list0), getCertainIndex(maint, list0), getCertainIndex(door, list0), getCertainIndex(persons, list0), getCertainIndex(lug_boot, list0), getCertainIndex(safety, list0))), getCertainIndex(y, list0), test_size = 0.1)
+x1_train, x1_test, y1_train, y1_test = sklearn.model_selection.train_test_split(list(zip(getCertainIndex(buying, list1), getCertainIndex(maint, list1), getCertainIndex(door, list1), getCertainIndex(persons, list1), getCertainIndex(lug_boot, list1), getCertainIndex(safety, list1))), getCertainIndex(y, list1), test_size = 0.1)
+x2_train, x2_test, y2_train, y2_test = sklearn.model_selection.train_test_split(list(zip(getCertainIndex(buying, list2), getCertainIndex(maint, list2), getCertainIndex(door, list2), getCertainIndex(persons, list2), getCertainIndex(lug_boot, list2), getCertainIndex(safety, list2))), getCertainIndex(y, list2), test_size = 0.1)
+x3_train, x3_test, y3_train, y3_test = sklearn.model_selection.train_test_split(list(zip(getCertainIndex(buying, list3), getCertainIndex(maint, list3), getCertainIndex(door, list3), getCertainIndex(persons, list3), getCertainIndex(lug_boot, list3), getCertainIndex(safety, list3))), getCertainIndex(y, list3), test_size = 0.1)
+
 x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.1)
 
 K = 7
@@ -106,3 +118,14 @@ for x in range(len(x_test)):
 print(acc)
 print("%d out of the %d tests passed giving an accruacy of %f percent" %(correct, total, correct / total * 100))
 print(testNot2 / totalTestNot2, (correct - testNot2) / (total - totalTestNot2)) # there is a significant discrepancy
+
+
+# this is to see if learning can be done better if there are equal portions of data being split per outcome
+x_train = x0_train + x1_train + x2_train + x3_train
+x_test = x0_test + x1_test + x2_test + x3_test
+y_train = y0_train + y1_train + y2_train + y3_train
+y_test = y0_test + y1_test + y2_test + y3_test
+model = KNeighborsClassifier(n_neighbors=K)
+model.fit(x_train, y_train)
+acc = model.score(x_test, y_test)
+print(acc)
