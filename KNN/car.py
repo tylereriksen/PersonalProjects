@@ -85,7 +85,7 @@ x3_train, x3_test, y3_train, y3_test = sklearn.model_selection.train_test_split(
 
 x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.1)
 
-K = 7
+K = 9
 
 # this is the SKLearn model for KNN to compare to our model
 model = KNeighborsClassifier(n_neighbors=K)
@@ -127,5 +127,10 @@ y_train = y0_train + y1_train + y2_train + y3_train
 y_test = y0_test + y1_test + y2_test + y3_test
 model = KNeighborsClassifier(n_neighbors=K)
 model.fit(x_train, y_train)
+not2Indexes = [x for x in range(len(y_test)) if not y_test[x] == 2]
+is2Indexes = [x for x in range(len(y_test)) if y_test[x] == 2]
 acc = model.score(x_test, y_test)
+accN2 = model.score(getCertainIndex(x_test, not2Indexes), getCertainIndex(y_test, not2Indexes))
+acc2 = model.score(getCertainIndex(x_test, is2Indexes), getCertainIndex(y_test, is2Indexes))
 print(acc)
+print(accN2, acc2) # differences in the discrepancies of the accruacy levels of output of 2 and not 2
