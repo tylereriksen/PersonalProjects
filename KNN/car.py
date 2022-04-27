@@ -74,6 +74,8 @@ predict = "class"
 X = list(zip(buying, maint, door, persons, lug_boot, safety))
 y = list(cls)
 
+# this is an experimental set
+'''
 list0 = [idx for idx in range(len(cls)) if cls[idx] == 0]
 list1 = [idx for idx in range(len(cls)) if cls[idx] == 1]
 list2 = [idx for idx in range(len(cls)) if cls[idx] == 2]
@@ -82,6 +84,7 @@ x0_train, x0_test, y0_train, y0_test = sklearn.model_selection.train_test_split(
 x1_train, x1_test, y1_train, y1_test = sklearn.model_selection.train_test_split(list(zip(getCertainIndex(buying, list1), getCertainIndex(maint, list1), getCertainIndex(door, list1), getCertainIndex(persons, list1), getCertainIndex(lug_boot, list1), getCertainIndex(safety, list1))), getCertainIndex(y, list1), test_size = 0.1)
 x2_train, x2_test, y2_train, y2_test = sklearn.model_selection.train_test_split(list(zip(getCertainIndex(buying, list2), getCertainIndex(maint, list2), getCertainIndex(door, list2), getCertainIndex(persons, list2), getCertainIndex(lug_boot, list2), getCertainIndex(safety, list2))), getCertainIndex(y, list2), test_size = 0.1)
 x3_train, x3_test, y3_train, y3_test = sklearn.model_selection.train_test_split(list(zip(getCertainIndex(buying, list3), getCertainIndex(maint, list3), getCertainIndex(door, list3), getCertainIndex(persons, list3), getCertainIndex(lug_boot, list3), getCertainIndex(safety, list3))), getCertainIndex(y, list3), test_size = 0.1)
+'''
 
 x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.1)
 
