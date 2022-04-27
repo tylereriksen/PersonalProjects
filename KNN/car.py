@@ -118,8 +118,17 @@ for x in range(len(x_test)):
 print(acc)
 print("%d out of the %d tests passed giving an accruacy of %f percent" %(correct, total, correct / total * 100))
 print(testNot2 / totalTestNot2, (correct - testNot2) / (total - totalTestNot2)) # there is a significant discrepancy
+'''
+    There seems to be no discernable difference in accruacy between these two methods of KNN. On average, 
+    there is less than a 2 percent difference in the accuracies between the two. However, there seems to
+    be a huge discrepancy in the accuracy results of ones with an output of 2 and those that do not. My
+    thoughts were that this could be improved upon if 
+'''
 
 
+
+# experiment to see if dividing data in a certain way would help with accuracy
+'''
 # this is to see if learning can be done better if there are equal portions of data being split per outcome
 x_train = x0_train + x1_train + x2_train + x3_train
 x_test = x0_test + x1_test + x2_test + x3_test
@@ -134,3 +143,4 @@ accN2 = model.score(getCertainIndex(x_test, not2Indexes), getCertainIndex(y_test
 acc2 = model.score(getCertainIndex(x_test, is2Indexes), getCertainIndex(y_test, is2Indexes))
 print(acc)
 print(accN2, acc2) # differences in the discrepancies of the accruacy levels of output of 2 and not 2
+'''
