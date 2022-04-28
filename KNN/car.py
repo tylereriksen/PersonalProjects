@@ -127,6 +127,10 @@ print(testNot2 / totalTestNot2, (correct - testNot2) / (total - totalTestNot2)) 
     be a huge discrepancy in the accuracy results of ones with an output of 2 and those that do not. My
     thoughts were that this could be improved upon if 
 '''
+# NOTE: this algorithm seems to work less well with a higher number of covariates passed in as X
+# NOTE: although I have seen many sources claim that the square root of the size of inputs is the
+# most optimal value of n, the algorithm here seems to do better at single digit n values, far 
+# from this suggested outcome.
 
 
 
