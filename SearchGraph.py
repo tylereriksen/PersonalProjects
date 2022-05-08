@@ -7,17 +7,17 @@ graph = {
 }
 
 def BFS(G, start):
-    if start not in G.keys():
+    if start not in set(G.keys()):
         raise Exception("Start node is invalid")
 
     visited = []
     queue = [start]
     while len(queue) > 0:
         node = queue.pop(0)
-        if node not in visited:
+        if node not in set(visited):
             visited.append(node)
-            for neighbors in G[node]:
-                if neighbors not in visited:
+            for neighbors in set(G[node]):
+                if neighbors not in set(visited):
                     queue.append(neighbors)
     return visited
 
@@ -27,5 +27,5 @@ def isBFSComplete(G, start):
         return True
     return False
 
-print(BFS(graph, 0))
-print(isBFSComplete(graph, 0))
+print(BFS(graph, 1))
+# print(isBFSComplete(graph, 0))
