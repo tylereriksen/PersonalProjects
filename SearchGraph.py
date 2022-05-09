@@ -55,5 +55,11 @@ def DFS(G, start):
     DFS_algo(G, start)
     return visited
 
+def isDFSComplete(G, start):
+    returnVisit = DFS(G, start)
+    if len(returnVisit) == len(G.keys()):
+        return True
+    return False
+
 print(BFS(graph, 0))
 print(DFS(graph, 0))
