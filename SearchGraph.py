@@ -10,9 +10,14 @@ graph = {
     8: [5, 7, 9],
     9: [8], 
     10: [11],
-    11: [10]
+    11: [10],
+    12: [13],
+    13: [12, 14, 15],
+    14: [13, 15],
+    15: [13, 14]
 }
 
+# function for BFS Search
 def BFS(G, start):
 
     # make sure the starting Node is in the graph
@@ -30,12 +35,14 @@ def BFS(G, start):
                     queue.append(neighbors)
     return visited
 
+# return if the BFS search went through 
 def isBFSComplete(G, start):
     returnVisit = BFS(G, start)
     if len(returnVisit) == len(G.keys()):
         return True
     return False
 
+# function for DFS Search
 def DFS(G, start):
 
     # make sure the starting Node is in the graph
@@ -57,17 +64,20 @@ def DFS(G, start):
     DFS_algo(G, start)
     return visited
 
+# return if the DFS search went through 
 def isDFSComplete(G, start):
     returnVisit = DFS(G, start)
     if len(returnVisit) == len(G.keys()):
         return True
     return False
 
-# not finished
+# function that returns all the "islands" of the graph
 def getIslands(G):
+
     if len(G.keys()) == 0:
         return 0
-    start = G.keys()[0]
+
+    start = list(G.keys())[0]
     islands = []
 
     def lenLists(listOfLists):
@@ -77,10 +87,18 @@ def getIslands(G):
                 length += 1
         return length
 
-    while not lenLists(islands) == len(G.keys()):
+    while True:
         islands.append(BFS(G, start))
-        start = set(G.keys())
+        totalNodesList = set([y for x in islands for y in x])
+
+        if lenLists(islands) == len(G.keys()):
+            break
+
+        start = sorted(set(G.keys()).difference(totalNodesList))[0]
+
+    return islands
 
 
 print(BFS(graph, 0))
 print(DFS(graph, 0))
+print(getIslands(graph))
