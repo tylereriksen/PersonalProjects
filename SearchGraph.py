@@ -8,7 +8,9 @@ graph = {
     6: [5],
     7: [5, 8],
     8: [5, 7, 9],
-    9: [8]
+    9: [8], 
+    10: [11],
+    11: [10]
 }
 
 def BFS(G, start):
@@ -60,6 +62,25 @@ def isDFSComplete(G, start):
     if len(returnVisit) == len(G.keys()):
         return True
     return False
+
+# not finished
+def getIslands(G):
+    if len(G.keys()) == 0:
+        return 0
+    start = G.keys()[0]
+    islands = []
+
+    def lenLists(listOfLists):
+        length = 0
+        for listBig in listOfLists:
+            for listSmall in listBig:
+                length += 1
+        return length
+
+    while not lenLists(islands) == len(G.keys()):
+        islands.append(BFS(G, start))
+        start = set(G.keys())
+
 
 print(BFS(graph, 0))
 print(DFS(graph, 0))
