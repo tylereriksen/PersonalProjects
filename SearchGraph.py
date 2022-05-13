@@ -36,6 +36,7 @@ def BFS(G, start):
     return visited
 
 # return if the BFS search went through 
+# this will also show if a graph is 'strongly connected' or not
 def isBFSComplete(G, start):
     returnVisit = BFS(G, start)
     if len(returnVisit) == len(G.keys()):
@@ -98,7 +99,11 @@ def getIslands(G):
 
     return islands
 
+def numIslands(G):
+    return len(getIslands(G))
+
 
 print(BFS(graph, 0))
 print(DFS(graph, 0))
 print(getIslands(graph))
+print(numIslands(graph))
