@@ -5,6 +5,7 @@ import pandas as pd
     and tries to assign workers based on their availability and work notice.
 '''
 
+# this is to get the spreadsheet
 URL = "https://docs.google.com/spreadsheets/d/11G5X1aMFBRqRV7kphT3b1hZkr0KaAfs0P2GASoNZqE4/edit?usp=sharing"
 path = 'https://drive.google.com/uc?export=download&id='+URL.split('/')[-2]
 df = pd.read_csv(path)
