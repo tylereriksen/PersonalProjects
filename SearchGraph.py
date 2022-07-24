@@ -1,3 +1,5 @@
+# attempted to do some little project with BFS and DFS but ended up not finishing
+
 graph = {
     0: [1, 2],
     1: [0, 2, 3, 4],
