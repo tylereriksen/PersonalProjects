@@ -3,33 +3,13 @@
 
 import re
 import pandas as pd
-import matplotlib.pytplot as plt
+import matplotlib.pyplot as plt
+import numpy as np
 
-# class for a Trader
-# will contain trader name, trade size, trade type, trade limit, and time executed
-class Trader():
-    def __init__(self, name):
-        self.name = name
-        self.bors = ""
-        self.amount = 0
-        self.time = ""
-        self.limit = 0
-
-    def putOrder(self, amount, bors, time, limit):
-        self.bors = bors
-        self.amount = amount
-        self.time = time
-        self.limit = limit
-        if self.limit == "Market":
-            if self.bors == "Buy":
-                self.limit = 1000000
-            elif self.bors == "Sell":
-                self.limit = 0
-        return [self.name, self.bors, self.amount, self.time, self.limit]
 
 # class for time to 
 class Time():
-    def __init__(self, time):
+    def __init__(self, time: str):
         regex = "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
         p = re.compile(regex)
         if time == "":
@@ -39,7 +19,7 @@ class Time():
             raise Exception("Invalid Time String")
         self.time = time
 
-    def compareTime(self, other):
+    def compareTime(self, other) -> int:
         hour1 = int(self.time[:self.time.index(":")])
         min1 = int(self.time[self.time.index(":") + 1:])
         hour2 = int(other.time[:self.time.index(":")])
@@ -54,15 +34,30 @@ class Time():
             return -1
         return 0
 
+# class for a Trader
+# will contain trader name, trade size, trade type, trade limit, and time executed
+class Trader():
+    def __init__(self, name: str):
+        self.name = name
+        self.bors = ""
+        self.amount = 0
+        self.time = ""
+        self.limit = 0
 
-TRADES = {
-    "Name": ["Bea", "Sam", "Ben", "Sol", "Stu", "Bif", "Bob", "Sue", "Bud"],
-    "Order Number": [3, 2, 2, 1, 5, 4, 2, 6, 7],
-    "Acquisition": ["Buy", "Sell", "Buy", "Sell", "Sell", "Buy", "Buy", "Sell", "Buy"],
-    "Time": [Time("10:01"), Time("10:05"), Time("10:08"), Time("10:09"), Time("10:10"), Time("10:15"), Time("10:18"), Time("10:20"), Time("10:29")],
-    "Limit": [20.0, 20.1, 20.0, 19.8, 20.2, "Market", 20.1, 20.0, 19.8]
-}
+    def putOrder(self, amount: float, bors: str, time: Time, limit: float) -> list:
+        self.bors = bors
+        self.amount = amount
+        self.time = time
+        self.limit = limit
+        if self.limit == "Market":
+            if self.bors == "Buy":
+                self.limit = 1000000
+            elif self.bors == "Sell":
+                self.limit = 0
+        return [self.name, self.bors, self.amount, self.time, self.limit]
 
+
+# this is a trade queue where people submit their auction bids and offers
 TRADE_QUEUE = [
     Trader("Bea").putOrder(3.0, "Buy", Time("10:01"), 20.0),
     Trader("Sam").putOrder(2.0, "Sell", Time("10:05"), 20.1),
@@ -73,7 +68,8 @@ TRADE_QUEUE = [
     Trader("Bob").putOrder(2.0, "Buy", Time("10:18"), 20.1),
     Trader("Sue").putOrder(6.0, "Sell", Time("10:20"), 20.0),
     Trader("Sos").putOrder(3.0, "Sell", Time("10:25"), 20.0),
-    Trader("Bud").putOrder(7.0, "Buy", Time("10:29"), 19.8)
+    Trader("Bud").putOrder(7.0, "Buy", Time("10:27"), 19.8),
+    Trader("Sid").putOrder(2.0, "Sell", Time("10:29"), 19.8)
 ]
 AUCTION_TIMES = [Time("10:00"), Time("10:30")]
 
@@ -83,6 +79,7 @@ for idx, val in enumerate(TRADE_QUEUE[:-1]):
     if TRADE_QUEUE[idx + 1][3].compareTime(val[3]) == -1:
         print("ERROR")
 
+# create the limit order book data for the above trade queue
 OrderBook = pd.DataFrame().from_dict({
     "Selling Trader": [], 
     "Selling Size": [], 
@@ -91,6 +88,9 @@ OrderBook = pd.DataFrame().from_dict({
     "Buying Trader": []
 })
 
+# go through the trades in the queue and insert them into the data accordingly
+# high bids and low asks get priority first
+# if ask and bid prices are the sae, time priority is used
 for trade in TRADE_QUEUE:
     index = 0
     outside_current_prices = True
@@ -119,13 +119,13 @@ for trade in TRADE_QUEUE:
             if OrderBook.at[0, "Order Price"] > trade[4]:
                 index = len(OrderBook)
     
-
+    # the data to be inputted
     append_dict = {
-        "Selling Trader": trade[0] if trade[1] == "Sell" else "",
-        "Selling Size": trade[2] if trade[1] == "Sell" else "",
+        "Selling Trader": trade[0] if trade[1] == "Sell" else None,
+        "Selling Size": trade[2] if trade[1] == "Sell" else None,
         "Order Price": trade[4],
-        "Buying Size": trade[2] if trade[1] == "Buy" else "",
-        "Buying Trader": trade[0] if trade[1] == "Buy" else ""
+        "Buying Size": trade[2] if trade[1] == "Buy" else None,
+        "Buying Trader": trade[0] if trade[1] == "Buy" else None
     }
     new_entry = pd.DataFrame(append_dict, index = [index])
     if index == 0:
@@ -141,3 +141,47 @@ for trade in TRADE_QUEUE:
     print()
 
 
+# separate ask and bids into DEMAND and SUPPLY
+# DEMAND is the bids since these people are demanding liquidity and instruments
+# SUPPLY are the asks since these people are offering liquidity and instruments
+DEMAND = OrderBook[["Buying Size", "Buying Trader", "Order Price"]].dropna()
+SUPPLY = OrderBook[["Selling Size", "Selling Trader", "Order Price"]].dropna()
+
+# demand when price is infinitely big is intuitively 0
+D_Price = [np.inf]
+D_Graph = [0]
+for i in range(len(DEMAND)-1, -1, -1):
+    D_Price.append(DEMAND["Order Price"].iloc[i])
+    D_Price.append(DEMAND["Order Price"].iloc[i])
+    D_Graph.append(D_Graph[-1])
+    D_Graph.append(D_Graph[-1] + DEMAND["Buying Size"].iloc[i])
+D_Price.append(0)
+D_Graph.append(D_Graph[-1])
+
+# supply wen price is 0 is intuitively 0
+S_Price = [0]
+S_Graph = [0]
+for i in range(0, len(SUPPLY)):
+    S_Price.append(SUPPLY["Order Price"].iloc[i])
+    S_Price.append(SUPPLY["Order Price"].iloc[i])
+    S_Graph.append(S_Graph[-1])
+    S_Graph.append(S_Graph[-1] + SUPPLY["Selling Size"].iloc[i])
+S_Price.append(1e6)
+S_Graph.append(S_Graph[-1])
+
+plt.plot(D_Price, D_Graph, 'r', label="Demand")
+plt.plot(S_Price, S_Graph, 'b', label="Supply")
+plt.plot(20, 11, 'kx', label="Equilibrium")
+plt.legend()
+plt.grid()
+plt.title("SUPPLY AND DEMAND OF SINGLE PRICE AUCTION")
+plt.xlim([19.7, 20.4])
+plt.show()
+
+for idx, val in enumerate(S_Price):
+    if S_Graph[idx] > D_Graph[len(D_Graph) - 1 - idx]:
+        print()
+        print("TRADES HAPPENED AT %f" %(val))
+        print("THERE WERE A TOTAL OF %d INSTRUMENTS BEING TRADED" %(int(min(D_Graph[max(index for index, item in enumerate(D_Price) if item == val)], S_Graph[max(index for index, item in enumerate(S_Price) if item == val)]))))
+        break
+    
