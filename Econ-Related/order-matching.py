@@ -3,6 +3,7 @@
 
 import re
 import pandas as pd
+import matplotlib.pytplot as plt
 
 # class for a Trader
 # will contain trader name, trade size, trade type, trade limit, and time executed
@@ -138,4 +139,5 @@ for trade in TRADE_QUEUE:
     print("Updated Limit Order Book: ")
     print(OrderBook)
     print()
+
 
