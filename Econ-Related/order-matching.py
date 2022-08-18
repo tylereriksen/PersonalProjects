@@ -58,6 +58,7 @@ class Trader():
 
 
 # this is a trade queue where people submit their auction bids and offers
+TICK = 0.1
 TRADE_QUEUE = [
     Trader("Bea").putOrder(3.0, "Buy", Time("10:01"), 20.0),
     Trader("Sam").putOrder(2.0, "Sell", Time("10:05"), 20.1),
@@ -88,6 +89,8 @@ OrderBook = pd.DataFrame().from_dict({
     "Buying Trader": []
 })
 
+
+# -------------------------------------- THIS IS FOR ORDER BOOK --------------------------------------
 # go through the trades in the queue and insert them into the data accordingly
 # high bids and low asks get priority first
 # if ask and bid prices are the sae, time priority is used
@@ -141,11 +144,12 @@ for trade in TRADE_QUEUE:
     print()
 
 
+# -------------------------------- THIS IS FOR DEMAND AND SUPPLY GRAPH -------------------------------
 # separate ask and bids into DEMAND and SUPPLY
 # DEMAND is the bids since these people are demanding liquidity and instruments
 # SUPPLY are the asks since these people are offering liquidity and instruments
-DEMAND = OrderBook[["Buying Size", "Buying Trader", "Order Price"]].dropna()
-SUPPLY = OrderBook[["Selling Size", "Selling Trader", "Order Price"]].dropna()
+DEMAND = OrderBook[["Buying Size", "Buying Trader", "Order Price"]].dropna().reset_index(drop=True)
+SUPPLY = OrderBook[["Selling Size", "Selling Trader", "Order Price"]].dropna().reset_index(drop=True)
 
 # demand when price is infinitely big is intuitively 0
 D_Price = [np.inf]
@@ -178,10 +182,69 @@ plt.title("SUPPLY AND DEMAND OF SINGLE PRICE AUCTION")
 plt.xlim([19.7, 20.4])
 plt.show()
 
+
+
+# ---------------------------- FINDING THE AMOUNT TRADES AND PRICE TRADED ----------------------------
+# We essentially try to find the point at which the supply and demand curves meet
+# the x value is the price and the y value is amount traded
 for idx, val in enumerate(S_Price):
     if S_Graph[idx] > D_Graph[len(D_Graph) - 1 - idx]:
         print()
         print("TRADES HAPPENED AT %f" %(val))
+        trade_price = val
         print("THERE WERE A TOTAL OF %d INSTRUMENTS BEING TRADED" %(int(min(D_Graph[max(index for index, item in enumerate(D_Price) if item == val)], S_Graph[max(index for index, item in enumerate(S_Price) if item == val)]))))
+        trade_vol = int(min(D_Graph[max(index for index, item in enumerate(D_Price) if item == val)], S_Graph[max(index for index, item in enumerate(S_Price) if item == val)]))
         break
-    
+
+
+
+# ---------------------------------- FINDING TRADER SURPLUS AMOUNTS ----------------------------------
+trader_surpluses = {
+    "Trader Name": [],
+    "Trader Surplus": []
+}   
+
+def find_market_buy(data: pd.DataFrame, tick_size: float) -> float:
+    data = data[data['Order Price'] != 1000000.0]
+    return data["Order Price"].iloc[-1] + tick_size
+
+def find_market_sell(data: pd.DataFrame, tick_size: float) -> float:
+    data = data[data['Order Price'] != 0.0]
+    return data["Order Price"].iloc[0] - tick_size
+
+print(DEMAND)
+print(SUPPLY)
+
+buy_count = trade_vol
+for idx in range(len(DEMAND) - 1, -1, -1):
+    if buy_count == 0:
+        trader_surpluses["Trader Name"].append(DEMAND["Buying Trader"].iloc[idx])
+        trader_surpluses["Trader Surplus"].append(0.0)
+        continue
+    trader_surpluses["Trader Name"].append(DEMAND["Buying Trader"].iloc[idx])
+    b_order_size = buy_count if buy_count < DEMAND["Buying Size"].iloc[idx] else DEMAND["Buying Size"].iloc[idx]
+    buy_count -= b_order_size
+    if DEMAND["Order Price"].iloc[idx] != 1000000.0:
+        b_order_price = DEMAND["Order Price"].iloc[idx]
+    else:
+        b_order_price = find_market_buy(OrderBook, TICK)
+        print(b_order_price)
+    trader_surpluses["Trader Surplus"].append(round((b_order_price - trade_price) * b_order_size, 2))
+
+sell_count = trade_vol
+for idx in range(len(SUPPLY)):
+    if sell_count == 0:
+        trader_surpluses["Trader Name"].append(SUPPLY["Selling Trader"].iloc[idx])
+        trader_surpluses["Trader Surplus"].append(0.0)
+        continue
+    trader_surpluses["Trader Name"].append(SUPPLY["Selling Trader"].iloc[idx])
+    s_order_size = sell_count if sell_count < SUPPLY["Selling Size"].iloc[idx] else SUPPLY["Selling Size"].iloc[idx]
+    sell_count -= s_order_size
+    if SUPPLY["Order Price"].iloc[idx] != 0.0:
+        s_order_price = SUPPLY["Order Price"].iloc[idx]
+    else:
+        s_order_price = find_market_sell(OrderBook, TICK)
+    trader_surpluses["Trader Surplus"].append(round((trade_price - s_order_price) * s_order_size, 2))
+print(pd.DataFrame.from_dict(trader_surpluses))
+
+
