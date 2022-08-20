@@ -1,7 +1,7 @@
 import re
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
+from trading_and_pricing_functions import *
 
 # class for time to 
 class Time():
@@ -60,7 +60,7 @@ class Trader():
 TICK = 0.1 # minimum price increment needed to make a new different price bid or ask
 AUCTION_INTERVALS = [Time("10:00"), Time("10:30")]
 QUEUE = [
-    Trader("Sad").putOrder(4.0, "Sell", Time("09:59"), 'Market'),
+    Trader("Sad").putOrder(4.0, "Sell", Time("09:59"), 'Market'), # this is to test if the functions work when dealing with trades outside auction times
     Trader("Bea").putOrder(3.0, "Buy", Time("10:01"), 20.0),
     Trader("Sam").putOrder(2.0, "Sell", Time("10:05"), 20.1),
     Trader("Ben").putOrder(2.0, "Buy", Time("10:08"), 20.0),
@@ -75,34 +75,6 @@ QUEUE = [
     Trader("Bad").putOrder(1.0, "Buy", Time("10:31"), 20.1),
 ]
 
-# takes a trade from queue and spits out a pandas DataFrame by converting it into a row in the limit order book
-def generate_new_orderbook_row(trade: list) -> pd.DataFrame:
-    if len(trade) != 5:
-        raise Exception("Please enter a valid trade!")
-    append_dict = {
-        "Selling Trader": trade[0] if trade[1] == "Sell" else None,
-        "Selling Size": trade[2] if trade[1] == "Sell" else None,
-        "Order Price": trade[4],
-        "Buying Size": trade[2] if trade[1] == "Buy" else None,
-        "Buying Trader": trade[0] if trade[1] == "Buy" else None
-    }
-    return pd.DataFrame(append_dict, index=[0])
-
-# finds the index of where to append a trade row into the limit order book
-def find_index_to_update(data: pd.DataFrame, trade: list) -> int:
-    if trade[1] == "Sell":
-        for row in range(len(data) - 1, -1, -1):
-            if row == 0 and trade[4] < data["Order Price"].iloc[row]:
-                return -1
-            if trade[4] >= data["Order Price"].iloc[row]:
-                return row + 1
-
-    elif trade[1] == "Buy":
-        for row in range(len(data)):
-            if row == len(data) - 1 and trade[4] >= data["Order Price"].iloc[row]:
-                return len(data)
-            if trade[4] < data["Order Price"].iloc[row]:
-                return row - 1
 
 # get a trade and append this trade into the limit order book at the right place
 def update_orderbook(trade: list, data=None):
@@ -116,28 +88,6 @@ def update_orderbook(trade: list, data=None):
         return pd.concat([data, append_row]).reset_index(drop=True)
     return pd.concat([data.iloc[ :index], append_row, data.iloc[index: ]]).reset_index(drop=True)
 
-# takes in the limit order book and finds the approximate appropriate prices for the market buy and market sell orders
-# this will be defined as one tick above the highest limit price and one tick below the lowest limit price respectively
-def find_market_order_prices(data: pd.DataFrame, tick=TICK) -> tuple:
-    list_prices = list(np.array(data["Order Price"]))
-    index_b = -1
-    index_s = -1
-    if 1000000.0 not in list_prices:
-        market_buy = list_prices[-1] + tick
-    # WARNING: this will break if there are only market orders in the order book
-    else:
-        index_b = list_prices.index(1000000.0)
-        market_buy = list_prices[index_b - 1] + tick
-    if 0.0 not in list_prices:
-        market_sell = list_prices[0] - tick
-    # WARNING: this will break if there are only market orders in the order book
-    else:
-        list_prices.reverse()
-        index_s = len(list_prices) - 1 - list_prices.index(0.0)
-        list_prices.reverse()
-        market_sell = list_prices[index_s + 1] - tick
-    return (market_buy, market_sell)
-
 # replaces the fillin values for market orders with their approximate appropriate values
 def replace_market_placeholders(data: pd.DataFrame, tick=TICK) -> pd.DataFrame:
     market_b, market_s = find_market_order_prices(data, tick)
@@ -148,12 +98,7 @@ def replace_market_placeholders(data: pd.DataFrame, tick=TICK) -> pd.DataFrame:
             data.at[i, "Order Price"] = market_b
     return data
 
-def get_supply_data(data: pd.DataFrame) -> pd.DataFrame:
-    return data[["Selling Size", "Selling Trader", "Order Price"]].dropna().reset_index(drop=True)
-
-def get_demand_data(data: pd.DataFrame) -> pd.DataFrame:
-    return data[["Buying Size", "Buying Trader", "Order Price"]].dropna().reset_index(drop=True)
-
+# get the supply data and put it in the form of a price vs quantity supplied plot
 def get_supply_graph(data: pd.DataFrame) -> tuple:
     sup_data = get_supply_data(data)
     price = [0]
@@ -167,6 +112,7 @@ def get_supply_graph(data: pd.DataFrame) -> tuple:
     supply.append(supply[-1])
     return (price, supply)
 
+# get the demand data and put it in the form of a price vs quantity demanded plot
 def get_demand_graph(data: pd.DataFrame) -> tuple:
     dem_data = get_demand_data(data)
     price = [1e6]
@@ -180,6 +126,34 @@ def get_demand_graph(data: pd.DataFrame) -> tuple:
     demand.append(demand[-1])
     return (price, demand)
 
+def get_equilibrium(data: pd.DataFrame) -> tuple:
+    sup_data = get_supply_data(data)
+    dem_data = get_demand_data(data)
+    quantity = 0
+    last_trade = (-1, -1)
+    sup_ct = 0
+    dem_ct = len(dem_data) - 1
+    while sup_ct < len(sup_data) and dem_ct > -1 and sup_data["Order Price"].iloc[sup_ct] <= dem_data["Order Price"].iloc[dem_ct]:
+        amount = min(sup_data["Selling Size"].iloc[sup_ct], dem_data["Buying Size"].iloc[dem_ct])
+        sup_data.at[sup_ct, "Selling Size"] -= amount
+        dem_data.at[dem_ct, "Buying Size"] -= amount
+        quantity += amount
+        last_trade = (sup_data["Order Price"].iloc[sup_ct], dem_data["Order Price"].iloc[dem_ct])
+        print(sup_data["Selling Trader"].iloc[sup_ct], "and", dem_data["Buying Trader"].iloc[dem_ct], "traded", str(amount), "amount.")
+        if sup_data["Selling Size"].iloc[sup_ct] == 0:
+            if dem_data["Buying Size"].iloc[dem_ct] == 0:
+                sup_ct += 1
+                dem_ct -= 1
+            else:
+                sup_ct += 1
+        elif dem_data["Buying Size"].iloc[dem_ct] == 0:
+            dem_ct -= 1
+
+    if last_trade[0] == last_trade[1]:
+        return quantity, last_trade[0], None
+    else:
+        return quantity, last_trade[0], last_trade[1]
+        
 
 #----------------------------------------------------------------------------------------------------------------------
 
@@ -198,14 +172,16 @@ def main():
     print(ORDERBOOK)
     return ORDERBOOK
 
-def graph(data: pd.DataFrame):
+def graph(data: pd.DataFrame, equ_qty=None, equ_px=None):
     sup_px, sup = get_supply_graph(data)
     dem_px, dem = get_demand_graph(data)
     plt.plot(sup_px, sup, 'r', label="supply")
     plt.plot(dem_px, dem, 'b', label="demand")
+    if equ_qty is not None and equ_px is not None and not isinstance(equ_px, list):
+        plt.plot([equ_px], [equ_qty], 'kx', label="equilibrium")
     plt.xlabel("Prices")
     plt.ylabel("Quantity")
-    plt.xlim([min(sup_px[1] - 2 * TICK, dem_px[1] - 2 * TICK), max(sup_px[-2] + 2 * TICK, dem_px[-2] + 2 * TICK)])
+    plt.xlim([min(sup_px[1], dem_px[1]) - 2 * TICK, max(sup_px[-2], dem_px[-2]) + 2 * TICK])
     plt.title("Supply and Demand")
     plt.legend()
     plt.grid()
@@ -213,4 +189,7 @@ def graph(data: pd.DataFrame):
 
 if __name__ == "__main__":
     ORDERBOOK = main()
-    graph(ORDERBOOK)
+    qty, px, _ = get_equilibrium(ORDERBOOK)
+    if _ is not None:
+        px = [px, _]
+    graph(ORDERBOOK, qty, px)
