@@ -1,5 +1,5 @@
 # NOT A FINISHED PRODUCT
-# this code is to recreate a single price auction that uses uniform price distribution
+# this code is to recreate a single price auction that uses uniform pricing rule
 
 import re
 import pandas as pd
@@ -246,5 +246,6 @@ for idx in range(len(SUPPLY)):
         s_order_price = find_market_sell(OrderBook, TICK)
     trader_surpluses["Trader Surplus"].append(round((trade_price - s_order_price) * s_order_size, 2))
 print(pd.DataFrame.from_dict(trader_surpluses))
+
 
 
