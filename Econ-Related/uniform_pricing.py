@@ -1,7 +1,9 @@
+# import packages
 import re
 import pandas as pd
 import matplotlib.pyplot as plt
 from trading_and_pricing_functions import *
+
 
 # class for time
 class Time():
@@ -59,6 +61,9 @@ class Trader():
 
 TICK = 0.1 # minimum price increment needed to make a new different price bid or ask
 AUCTION_INTERVALS = [Time("10:00"), Time("10:30")]
+
+# if you want to change the queue of trade orders and see what quantity, price, and surpluses
+# it results, change the trades here:
 QUEUE = [
     Trader("Sad").putOrder(4.0, "Sell", Time("09:59"), 'Market'), # this is to test if the functions work when dealing with trades outside auction times
     Trader("Bea").putOrder(3.0, "Buy", Time("10:01"), 20.0),
@@ -75,6 +80,8 @@ QUEUE = [
     Trader("Bad").putOrder(1.0, "Buy", Time("10:31"), 20.1),
 ]
 
+
+#----------------------------------------------------------------------------------------------------------------------
 
 # get a trade and append this trade into the limit order book at the right place
 def update_orderbook(trade: list, data=None) -> pd.DataFrame:
@@ -126,6 +133,8 @@ def get_demand_graph(data: pd.DataFrame) -> tuple:
     demand.append(demand[-1])
     return (price, demand)
 
+# function that gets the trade prices and the trade quantity for the single-sided uniformly priced auction
+# also prints out who traded with who for what amount
 def get_equilibrium(data: pd.DataFrame) -> tuple:
     sup_data = get_supply_data(data)
     dem_data = get_demand_data(data)
@@ -156,6 +165,7 @@ def get_equilibrium(data: pd.DataFrame) -> tuple:
     else:
         return quantity, last_trade[0], last_trade[1]
 
+# function that returns a dataset with the trader's surplus (whether buyer or seller) in order of highest surplus to lowest
 def get_trader_surplus(data: pd.DataFrame, equ_qty: int, equ_px: float) -> pd.DataFrame:
     data_dict = {
         "Trader Name": [],
@@ -181,8 +191,11 @@ def get_trader_surplus(data: pd.DataFrame, equ_qty: int, equ_px: float) -> pd.Da
     data_dict = pd.DataFrame(data_dict).sort_values(by = ["Trader Surplus"], ascending=False).reset_index(drop=True)
     return data_dict
 
+
 #----------------------------------------------------------------------------------------------------------------------
 
+# function that will be called in the script that will take in the current trade queue
+# and update it with each successive order and will print each update
 def main() -> pd.DataFrame:
     ORDERBOOK = None
     for trade in QUEUE:
@@ -198,6 +211,10 @@ def main() -> pd.DataFrame:
     print(ORDERBOOK)
     return ORDERBOOK
 
+# function that will graph the supply and demand (sell and buy orders respectively) with 
+# repect to price; fill will show the buyer and seller surplus regions in the graph
+# and the equilibrium quantity and price will be plotted with an 'x' to mark the price 
+# and quantity at which the trades happened
 def graph(data: pd.DataFrame, fill=False, equ_qty=None, equ_px=None):
     if equ_qty is None or equ_px is None:
         fill=False
@@ -220,6 +237,7 @@ def graph(data: pd.DataFrame, fill=False, equ_qty=None, equ_px=None):
     plt.grid()
     plt.show()
 
+# print out the trader surplus data
 def surplus(data: pd.DataFrame, equ_qty: int, equ_px: float):
     print()
     print("TRADER SURPLUS SUMMARY:")
@@ -230,5 +248,5 @@ if __name__ == "__main__":
     qty, px, _ = get_equilibrium(ORDERBOOK)
     if _ is not None:
         px = [px, _]
-    graph(ORDERBOOK, True, qty, px)
     surplus(ORDERBOOK, qty, px)
+    graph(ORDERBOOK, True, qty, px)
