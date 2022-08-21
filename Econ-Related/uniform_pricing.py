@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from trading_and_pricing_functions import *
 
-# class for time to 
+# class for time
 class Time():
     def __init__(self, time: str):
         regex = "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
@@ -77,7 +77,7 @@ QUEUE = [
 
 
 # get a trade and append this trade into the limit order book at the right place
-def update_orderbook(trade: list, data=None):
+def update_orderbook(trade: list, data=None) -> pd.DataFrame:
     if data is None:
         return generate_new_orderbook_row(trade)
     index = find_index_to_update(data, trade)
@@ -133,6 +133,8 @@ def get_equilibrium(data: pd.DataFrame) -> tuple:
     last_trade = (-1, -1)
     sup_ct = 0
     dem_ct = len(dem_data) - 1
+    print()
+    print("TRADE SUMMARIES:")
     while sup_ct < len(sup_data) and dem_ct > -1 and sup_data["Order Price"].iloc[sup_ct] <= dem_data["Order Price"].iloc[dem_ct]:
         amount = min(sup_data["Selling Size"].iloc[sup_ct], dem_data["Buying Size"].iloc[dem_ct])
         sup_data.at[sup_ct, "Selling Size"] -= amount
@@ -153,11 +155,35 @@ def get_equilibrium(data: pd.DataFrame) -> tuple:
         return quantity, last_trade[0], None
     else:
         return quantity, last_trade[0], last_trade[1]
-        
+
+def get_trader_surplus(data: pd.DataFrame, equ_qty: int, equ_px: float) -> pd.DataFrame:
+    data_dict = {
+        "Trader Name": [],
+        "Buy or Sell": [],
+        "Trader Surplus": []
+    }
+    sup_data = get_supply_data(data)
+    dem_data = get_demand_data(data)
+    count = equ_qty
+    for i in range(len(sup_data)):
+        amount = min(sup_data["Selling Size"].iloc[i], max(count, 0))
+        count -= amount
+        data_dict["Trader Name"].append(sup_data["Selling Trader"].iloc[i])
+        data_dict["Buy or Sell"].append("Sell")
+        data_dict["Trader Surplus"].append(amount * abs(equ_px - sup_data["Order Price"].iloc[i]))
+    count = equ_qty
+    for i in range(len(dem_data)-1, -1, -1):
+        amount = min(dem_data["Buying Size"].iloc[i], max(count, 0))
+        count -= amount
+        data_dict["Trader Name"].append(dem_data["Buying Trader"].iloc[i])
+        data_dict["Buy or Sell"].append("Buy")
+        data_dict["Trader Surplus"].append(amount * abs(dem_data["Order Price"].iloc[i] - equ_px))
+    data_dict = pd.DataFrame(data_dict).sort_values(by = ["Trader Surplus"], ascending=False).reset_index(drop=True)
+    return data_dict
 
 #----------------------------------------------------------------------------------------------------------------------
 
-def main():
+def main() -> pd.DataFrame:
     ORDERBOOK = None
     for trade in QUEUE:
         if trade[3].compareTime(AUCTION_INTERVALS[1]) == -1 and trade[3].compareTime(AUCTION_INTERVALS[0]) != -1:
@@ -172,13 +198,20 @@ def main():
     print(ORDERBOOK)
     return ORDERBOOK
 
-def graph(data: pd.DataFrame, equ_qty=None, equ_px=None):
+def graph(data: pd.DataFrame, fill=False, equ_qty=None, equ_px=None):
+    if equ_qty is None or equ_px is None:
+        fill=False
     sup_px, sup = get_supply_graph(data)
     dem_px, dem = get_demand_graph(data)
     plt.plot(sup_px, sup, 'r', label="supply")
     plt.plot(dem_px, dem, 'b', label="demand")
     if equ_qty is not None and equ_px is not None and not isinstance(equ_px, list):
         plt.plot([equ_px], [equ_qty], 'kx', label="equilibrium")
+    if fill:
+        index1 = sup_px.index(equ_px)
+        index2 = dem_px.index(equ_px)
+        plt.fill_between(sup_px[:index1 + 1], 0, sup[:index1 + 1], color="red", alpha=0.2, label="Supplier's Surplus")
+        plt.fill_between(dem_px[:index2 + 1], 0, dem[:index2 + 1], color="blue", alpha=0.2, label="Buyer's Surplus")
     plt.xlabel("Prices")
     plt.ylabel("Quantity")
     plt.xlim([min(sup_px[1], dem_px[1]) - 2 * TICK, max(sup_px[-2], dem_px[-2]) + 2 * TICK])
@@ -187,9 +220,15 @@ def graph(data: pd.DataFrame, equ_qty=None, equ_px=None):
     plt.grid()
     plt.show()
 
+def surplus(data: pd.DataFrame, equ_qty: int, equ_px: float):
+    print()
+    print("TRADER SURPLUS SUMMARY:")
+    print(get_trader_surplus(data, equ_qty, equ_px))
+
 if __name__ == "__main__":
     ORDERBOOK = main()
     qty, px, _ = get_equilibrium(ORDERBOOK)
     if _ is not None:
         px = [px, _]
-    graph(ORDERBOOK, qty, px)
+    graph(ORDERBOOK, True, qty, px)
+    surplus(ORDERBOOK, qty, px)
