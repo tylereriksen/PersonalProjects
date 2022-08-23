@@ -77,7 +77,7 @@ QUEUE = [
     Trader("Sos").putOrder(3.0, "Sell", Time("10:25"), 20.0),
     Trader("Bud").putOrder(7.0, "Buy", Time("10:27"), 19.8),
     Trader("Sid").putOrder(2.0, "Sell", Time("10:29"), 19.8),
-    Trader("Bad").putOrder(1.0, "Buy", Time("10:31"), 20.1),
+    Trader("Bad").putOrder(1.0, "Buy", Time("10:31"), 20.1)
 ]
 
 
