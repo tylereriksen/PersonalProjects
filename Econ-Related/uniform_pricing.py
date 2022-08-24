@@ -200,7 +200,7 @@ def main() -> pd.DataFrame:
     ORDERBOOK = None
     for trade in QUEUE:
         if trade[3].compareTime(AUCTION_INTERVALS[1]) == -1 and trade[3].compareTime(AUCTION_INTERVALS[0]) != -1:
-            ORDERBOOK = update_orderbook(trade, ORDERBOOK)
+            ORDERBOOK = check_invalid_price_order(update_orderbook(trade, ORDERBOOK))
             print("UPDATED ORDER BOOK:")
             print(ORDERBOOK)
             print()

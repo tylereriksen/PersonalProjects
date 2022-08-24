@@ -73,7 +73,7 @@ QUEUE = [
     Trader("Bud").putOrder(7.0, "Buy", Time("10:27"), 19.8),
     Trader("Sid").putOrder(2.0, "Sell", Time("10:29"), 19.8)]
 
-
+    
 # get a trade and append this trade into the limit order book at the right place
 def update_orderbook(trade: list, data=None) -> pd.DataFrame:
     if data is None:
@@ -86,39 +86,45 @@ def update_orderbook(trade: list, data=None) -> pd.DataFrame:
         return pd.concat([data, append_row]).reset_index(drop=True)
     return pd.concat([data.iloc[ :index], append_row, data.iloc[index: ]]).reset_index(drop=True)
 
-def check_sell_order_trades(data: pd.DataFrame, trade: list):
-    index = list(data["Selling Trader"]).index(trade[0])
-
-    delete_indexes = []
-    i = len(data) - 1
-    while data["Selling Size"].iloc[index] > 0 and i >= 0:
-        if data["Order Price"].iloc[i] < data["Order Price"].iloc[index]:
-            break
-        if data["Buying Size"].iloc[i] is None or data["Buying Size"].iloc[i] == 0:
-            i -= 1
-            continue
-        trading = min(data["Selling Size"].iloc[index], data["Buying Size"].iloc[i])
-        data.at[index, "Selling Size"] -= trading
-        data.at[i, "Buying Size"] -= trading
-        if data["Selling Size"].iloc[index] == 0:
-            delete_indexes.append(index)
-            break
-        if data["Buying Size"].iloc[i] == 0:
-            delete_indexes.append(i)
-            i -= 1
-
-    data = data.drop(data.index[delete_indexes])
-    return data.reset_index(drop=True)
-
-        
+# check to see if an order caused a trade and return the updated orderbook along with trade summary
+def check_order_trades(data: pd.DataFrame, trade: list) -> tuple:
+    if trade[1] == "Sell":
+        data, tradebook = check_sell_order_trades(data, trade)
+    elif trade[1] == "Buy":
+        data, tradebook = check_buy_order_trades(data, trade)
+    data = check_for_zeros(data)
+    return data, tradebook
 
 
-ORDERBOOK = None
-for trade in QUEUE:
-    ORDERBOOK = update_orderbook(trade, ORDERBOOK)
+def main():
+    ORDERBOOK = None
+    TRADES = None
+    for trade in QUEUE:
+        ORDERBOOK = check_invalid_price_order(update_orderbook(trade, ORDERBOOK))
+        print("UPDATED ORDER BOOK:")
+        print(ORDERBOOK)
+        print()
+        print("CHECKING TRADES...")
+        ORDERBOOK, tradebook = check_order_trades(ORDERBOOK, trade)
+        if tradebook is None:
+            print("NO TRADES HAPPENED")
+            print()
+        else:
+            print("TRADES THAT HAPPENED:")
+            print(tradebook)
+            TRADES = pd.concat([TRADES, tradebook]).reset_index(drop=True)
+            print()
+            print("UPDATED ORDERBOOK WITH TRADES:")
+            print(ORDERBOOK)
+            print()
+    print()
+    print("FINAL ORDERBOOK OF THE QUEUE:")
     print(ORDERBOOK)
+    print()
+    print("FINAL TRADEBOOK:")
+    print(TRADES)
+    return ORDERBOOK, TRADES    
 
-ORDERBOOK = update_orderbook(Trader("Sad").putOrder(10.0, "Sell", Time("10:30"), 20.0), ORDERBOOK)
-a = check_sell_order_trades(ORDERBOOK, Trader("Sad").putOrder(10.0, "Sell", Time("10:30"), 20.2))
-print(a)
+if __name__ == "__main__":
+    ORDERBOOK, TRADES = main()
 
