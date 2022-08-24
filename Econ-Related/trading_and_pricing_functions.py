@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 
 '''
-    This file is to keep all the 'private' functions used in the uniform_pricing.py file.
+    This file is to keep all the 'private' functions used in the uniform_pricing.py and
+    discriminatory_pricing.py files.
 '''
 
 TICK = 0.1

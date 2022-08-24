@@ -1,3 +1,11 @@
+'''
+    This file is to show how in a single-sided auction, how the uniform pricing rule
+    works. This file will show how the orderbook gets updated with each successive 
+    order placement in the auction, how the trades are dealt with, and how much sur-
+    plus each trader earns from their trades. There will also be a graph shown to 
+    show at what price the trades happen at.
+'''
+
 # import packages
 import re
 import pandas as pd
@@ -134,7 +142,7 @@ def get_demand_graph(data: pd.DataFrame) -> tuple:
     return (price, demand)
 
 # function that gets the trade prices and the trade quantity for the single-sided uniformly priced auction
-# also prints out who traded with who for what amount
+# also prints out who traded with who for what amount (all trades happen at same price)
 def get_equilibrium(data: pd.DataFrame) -> tuple:
     sup_data = get_supply_data(data)
     dem_data = get_demand_data(data)
@@ -244,8 +252,8 @@ def surplus(data: pd.DataFrame, equ_qty: int, equ_px: float):
     print(get_trader_surplus(data, equ_qty, equ_px))
 
 if __name__ == "__main__":
-    ORDERBOOK = main()
-    qty, px, _ = get_equilibrium(ORDERBOOK)
+    ORDERBOOK = main() # update orderbook for each order placement
+    qty, px, _ = get_equilibrium(ORDERBOOK) # get trade prices and trade volume
     if _ is not None:
         px = [px, _]
     surplus(ORDERBOOK, qty, px)
