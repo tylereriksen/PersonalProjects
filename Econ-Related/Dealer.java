@@ -4,19 +4,22 @@ import java.util.Random;
 public class Dealer {
 
     /*
-     * Instance Variables for the Dealer class
+    * Instance Variables for the Dealer class
     */
     ArrayList<Double> bid = new ArrayList<Double>();
     ArrayList<Double> ask = new ArrayList<Double>();
     ArrayList<Integer> bidSize = new ArrayList<Integer>();
     ArrayList<Integer> askSize = new ArrayList<Integer>();
+    String name;
     int inventory;
     int last_inv;
+    private double tick = 1.0;
 
     // the constructor
-    public void Dealer(){
-        inventory = 0;
-        last_inv = 0;
+    public Dealer(String name){
+        this.name = name;
+        this.inventory = 0;
+        this.last_inv = 0;
     }
 
     /*
@@ -130,7 +133,7 @@ public class Dealer {
     * prints out the bid price and size information
     */
     private void printBidInfo(){
-        System.out.println("Current Bids are: ");
+        System.out.println(this.name + "'s Current Bids are: ");
         for(int i = 0; i < this.bid.size(); i++){
             System.out.println(this.bidSize.get(i) + " bid at " + this.bid.get(i));
         }
@@ -171,7 +174,7 @@ public class Dealer {
     * prints out the ask price and size information
     */
     private void printAskInfo(){
-        System.out.println("Current Asks are: ");
+        System.out.println(this.name + "'s Current Asks are: ");
         for(int i = 0; i < this.ask.size(); i++){
             System.out.println(this.askSize.get(i) + " ask at " + this.ask.get(i));
         }
@@ -283,6 +286,7 @@ public class Dealer {
     * takes a trade and updates the bid or ask size and/or prices with the trade
     * @param Object ArrayList tradeDetails - trade from Trader class method
     */
+    // LOOK AT THIS ONE AGAIN
     void trade(ArrayList<Object> tradeDetails){
         if(!(tradeDetails.get(0) instanceof String) ||
            !(tradeDetails.get(1) instanceof Double) ||
@@ -293,6 +297,9 @@ public class Dealer {
         int idx = 0;
         if(tradeDetails.get(3) == "Sell"){
             idx = this.bid.indexOf(tradeDetails.get(1));
+            if(idx == -1){
+                throw new ArrayIndexOutOfBoundsException("This Offer is not in the Dealer's Quotations.");
+            }
             if(this.bidSize.get(idx) >= (int)tradeDetails.get(2)){
                 int currentSize = this.bidSize.get(idx);
                 this.changeBidQuotation((Double)tradeDetails.get(1), currentSize - (int)tradeDetails.get(2));
@@ -302,6 +309,9 @@ public class Dealer {
 
         else if(tradeDetails.get(3) == "Buy"){
             idx = this.ask.indexOf(tradeDetails.get(1));
+            if(idx == -1){
+                throw new ArrayIndexOutOfBoundsException("This Offer is not in the Dealer's Quotations.");
+            }
             if(this.askSize.get(idx) >= (int)tradeDetails.get(2)){
                 int currentSize = this.askSize.get(idx);
                 this.changeAskQuotation((Double)tradeDetails.get(1), currentSize - (int)tradeDetails.get(2));
@@ -309,22 +319,26 @@ public class Dealer {
             }
         }
         System.out.println("Traded with " + tradeDetails.get(0) + " who offers to " + tradeDetails.get(3) + " " + tradeDetails.get(2) + " for " + tradeDetails.get(1) + " at " + tradeDetails.get(4) + ".");
-        System.out.println("Trade Summary: ");
+        String buy_or_sell;
+        if(tradeDetails.get(3) == "Buy"){buy_or_sell = "Sold";}
+        else if(tradeDetails.get(3) == "Sell"){buy_or_sell = "Bought";}
+        else{throw new IllegalArgumentException("Wrong Object in Trade Details.");}
+        System.out.println(tradeDetails.get(4) + " Trade Summary: " + buy_or_sell + " " + tradeDetails.get(2) + " for " + tradeDetails.get(1) + " from " + tradeDetails.get(0));
         System.out.println();
     }
 
     /*
-    * change the bid and ask prices and sizes according to trade/inventory size
+    * change the bid and ask prices and sizes according to inventory size
     */
-    void adjustToTrade(){
+    void adjustToInventory(){
         Random rand = new Random();
         int j = rand.nextInt(5);
         if(j > 0){
             for(int i = 0; i < this.bid.size(); i++){
-                this.changeBidPrice(this.bid.get(i), this.bid.get(i) - (this.inventory - this.last_inv));
+                this.changeBidPrice(this.bid.get(i), this.bid.get(i) - this.tick * (int)(0.4 * (this.inventory - this.last_inv)));
             }
             for(int i = 0; i < this.ask.size(); i++){
-                this.changeAskPrice(this.ask.get(i), this.ask.get(i) - this.inventory + this.last_inv);
+                this.changeAskPrice(this.ask.get(i), this.ask.get(i) - this.tick * (int)(0.4 * (this.inventory - this.last_inv)));
             }
             this.last_inv = this.inventory;
         }
@@ -346,6 +360,23 @@ public class Dealer {
                 }
             }
         }
+    }
+
+    /*
+    * change the bid and ask prices and sizes according to the trade
+    * @param Object ArrayList tradeDetails - trade that happened
+    */
+    void adjustToTrade(ArrayList<Object> tradeDetails){
+        int sign = 0;
+        if(tradeDetails.get(3) == "Buy"){sign = 1;}
+        else{sign = -1;}
+        for(int i = 0; i < this.bid.size(); i ++){
+            this.bid.set(i, this.bid.get(i) + sign * this.tick);
+        }
+        for(int i = 0; i < this.ask.size(); i ++){
+            this.ask.set(i, this.ask.get(i) + sign * this.tick);
+        }
+
     }
 
     /*
