@@ -302,7 +302,7 @@ public class Dealer {
             }
             if(this.bidSize.get(idx) >= (int)tradeDetails.get(2)){
                 int currentSize = this.bidSize.get(idx);
-                this.changeBidQuotation((Double)tradeDetails.get(1), currentSize - (int)tradeDetails.get(2));
+                this.changeBidQuotation((double)tradeDetails.get(1), currentSize + (int)tradeDetails.get(2));
                 this.inventory += (int)tradeDetails.get(2);
             }
         }
@@ -332,7 +332,7 @@ public class Dealer {
     */
     void adjustToInventory(){
         Random rand = new Random();
-        int j = rand.nextInt(5);
+        int j = rand.nextInt(10);
         if(j > 0){
             for(int i = 0; i < this.bid.size(); i++){
                 this.changeBidPrice(this.bid.get(i), this.bid.get(i) - this.tick * (int)(0.4 * (this.inventory - this.last_inv)));
