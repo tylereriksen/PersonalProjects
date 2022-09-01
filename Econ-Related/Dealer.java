@@ -380,6 +380,31 @@ public class Dealer {
     }
 
     /*
+    * In the rare case that there is a change in the daily cost of doing
+    * operations, adjust the bid and ask spread to be wider or narrower
+    */
+    void adjustToCosts(){
+        Random rand = new Random();
+        int rd = rand.nextInt(21) - 10;
+        if(rd == -10 && this.ask.get(0) - this.bid.get(0) > 2){
+            for(int i = 0; i < this.bid.size(); i++){
+                this.changeBidPrice(this.bid.get(i), this.bid.get(i) + 1);
+            }
+            for(int i = 0; i < this.ask.size(); i ++){
+                this.changeAskPrice(this.ask.get(i), this.ask.get(i) - 1);
+            }
+        }
+        else if(rd == 10){
+            for(int i = this.bid.size() - 1; i >= 0; i--){
+                this.changeBidPrice(this.bid.get(i), this.bid.get(i) - 1);
+            }
+            for(int i = this.ask.size() - 1; i >= 0; i--){
+                this.changeAskPrice(this.ask.get(i), this.ask.get(i) + 1);
+            }
+        }
+    }
+
+    /*
     * get the inside spread from a number of dealers
     * @param ArrayList<Dealer> dealerList - list of different dealers
     * @return double difference between best bid and best ask from all the dealers

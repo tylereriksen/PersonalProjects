@@ -13,22 +13,16 @@ public class RunDealers {
         d1.printDealerInfo();
 
         Trader tim = new Trader("Tim");
-        ArrayList<Object> timTrade1 = tim.trade(95.0, 10, 1);
-        d1.trade(timTrade1);
-        d1.adjustToTrade(timTrade1);
-        d1.adjustToInventory();
-        d1.printDealerInfo();
-
-        ArrayList<Object> timTrade2 = tim.trade(100.0, 5, 0);
-        d1.trade(timTrade2);
-        d1.adjustToTrade(timTrade2);
-        d1.adjustToInventory();
-        d1.printDealerInfo();
-        
-        ArrayList<Object> timTrade3 = tim.trade(101.0, 8, 0);
-        d1.trade(timTrade3);
-        d1.adjustToTrade(timTrade3);
-        d1.adjustToInventory();
-        d1.printDealerInfo();
+        ArrayList<ArrayList<Object>> timTrades = new ArrayList<>();
+        timTrades.add(tim.trade(95.0, 10, 1));
+        timTrades.add(tim.trade(100.0, 5, 0));
+        timTrades.add(tim.trade(104.0, 8, 0));
+        for(ArrayList<Object> s: timTrades){
+            d1.trade(s);
+            d1.adjustToTrade(s);
+            d1.adjustToInventory();
+            d1.adjustToCosts();
+            d1.printDealerInfo();
+        }
     }
 }
