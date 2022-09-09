@@ -21,6 +21,9 @@ class Body:
     def get_radius(self) -> float:
         return self.radius
 
+    def set_loc(self, new_loc: tuple) -> None:
+        self.loc = new_loc
+
     def distance(self, loc: tuple) -> float:
         return math.sqrt((self.loc[0] - loc[0]) ** 2 + (self.loc[1] - loc[1]) ** 2)
 
@@ -64,13 +67,13 @@ class Satellite:
 
 
 INTERVAL = 0.01
-Sat = Satellite((0, 0), (5000 * math.cos(math.pi * 37/180), 5000 * math.sin(math.pi * 37/180)))
+Sat = Satellite((-100000000 + 1.496e11, -100000000), (15000 * math.cos(math.pi * 68/180), 15000 * math.sin(math.pi * 68/180)))
 v0 = Sat.return_vel()
 print("STARTING POSITION: " + str(Sat.get_loc()))
 print("VELOCITY         : " + str(Sat.get_vel()))
 print()
 
-Earth = Body("Earth", (100000000, 100000000), 6.371e6, 5.972e24)
+Earth = Body("Earth", (1.496e11, 0), 6.371e6, 5.972e24)
 last_dict = {"Loc": Sat.get_loc(),
              "Vel Comp": Sat.get_vel(),
              "Vel": Sat.return_vel(),
@@ -80,8 +83,13 @@ Y = [Sat.get_loc()[1]]
 V = [Sat.return_vel()]
 D = [Earth.distance(Sat.get_loc())]
 A = [math.sqrt(Earth.acc_exerting(Sat.get_loc())[0] ** 2 + Earth.acc_exerting(Sat.get_loc())[1] ** 2)]
+EX = [1.496e11]
+EY = [0]
 
-for i in range(5000000):
+for i in range(4000000):
+    Earth.set_loc((1.496e11 * math.cos(2 * math.pi * INTERVAL * (i + 1) / 101557600), 1.496e11 * math.sin(2 * math.pi * INTERVAL * (i + 1) / 101557600)))
+    EX.append(Earth.get_loc()[0])
+    EY.append(Earth.get_loc()[1])
     acc = Earth.acc_exerting(Sat.get_loc())
     new_vel = Sat.change_vel(acc, INTERVAL)
 
@@ -128,6 +136,7 @@ ax1.add_patch(circle1)
 #ax.set_xlim(left=0, right=100)
 #ax.set_ylim(bottom=0, top=100)
 ax1.plot(X, Y, 'k')
+ax1.plot(EX, EY, 'b')
 ax1.title.set_text("Trajectory")
 
 ax4.plot(range(len(V)), V, 'k')
