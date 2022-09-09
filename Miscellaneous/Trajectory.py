@@ -67,7 +67,7 @@ class Satellite:
 
 
 INTERVAL = 0.01
-Sat = Satellite((-100000000 + 1.496e11, -100000000), (15000 * math.cos(math.pi * 68/180), 15000 * math.sin(math.pi * 68/180)))
+Sat = Satellite((-100000000 + 1.496e11, -100000000), (10000 * math.cos(math.pi * 78/180), 10000 * math.sin(math.pi * 78/180)))
 v0 = Sat.return_vel()
 print("STARTING POSITION: " + str(Sat.get_loc()))
 print("VELOCITY         : " + str(Sat.get_vel()))
@@ -86,8 +86,8 @@ A = [math.sqrt(Earth.acc_exerting(Sat.get_loc())[0] ** 2 + Earth.acc_exerting(Sa
 EX = [1.496e11]
 EY = [0]
 
-for i in range(4000000):
-    Earth.set_loc((1.496e11 * math.cos(2 * math.pi * INTERVAL * (i + 1) / 101557600), 1.496e11 * math.sin(2 * math.pi * INTERVAL * (i + 1) / 101557600)))
+for i in range(10000000):
+    Earth.set_loc((1.496e11 * math.cos(2 * math.pi * INTERVAL * (i + 1) / 31557600 - (math.pi * 1/480)), 1.496e11 * math.sin(2 * math.pi * INTERVAL * (i + 1) / 31557600 - (math.pi / 480))))
     EX.append(Earth.get_loc()[0])
     EY.append(Earth.get_loc()[1])
     acc = Earth.acc_exerting(Sat.get_loc())
@@ -128,26 +128,28 @@ for i in range(4000000):
         break
 
 
+fig = plt.figure(figsize=(6, 9))
+plt.subplots_adjust(wspace = 0.25, hspace = 0.25)
+sub1 = fig.add_subplot(1, 2, 1)
 circle1 = plt.Circle(Earth.get_loc(), Earth.get_radius(), color='b')
-fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-ax1.set_aspect(1)
+sub1.set_aspect(1)
+sub1.add_patch(circle1)
+sub1.plot(X, Y, 'k')
+sub1.plot(EX, EY, 'b')
+sub1.title.set_text("Trajectory")
 
-ax1.add_patch(circle1)
-#ax.set_xlim(left=0, right=100)
-#ax.set_ylim(bottom=0, top=100)
-ax1.plot(X, Y, 'k')
-ax1.plot(EX, EY, 'b')
-ax1.title.set_text("Trajectory")
+sub2 = fig.add_subplot(3, 2, 2)
+sub2.plot(range(len(D)), D, 'b')
+sub2.title.set_text("Distance")
+sub2.grid()
 
-ax4.plot(range(len(V)), V, 'k')
-ax4.title.set_text("Velocity")
-ax4.grid()
+sub3 = fig.add_subplot(3, 2, 4)
+sub3.plot(range(len(A)), A, 'r')
+sub3.title.set_text("Acceleration")
+sub3.grid()
 
-ax3.plot(range(len(A)), A, 'r')
-ax3.title.set_text("Acceleration")
-ax3.grid()
-
-ax2.plot(range(len(D)), D, 'b')
-ax2.title.set_text("Distance")
-ax2.grid()
+sub4 = fig.add_subplot(3, 2, 6)
+sub4.plot(range(len(V)), V, 'k')
+sub4.title.set_text("Velocity")
+sub4.grid()
 plt.show()
